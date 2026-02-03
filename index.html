@@ -1,253 +1,158 @@
 <!DOCTYPE html>
-<html>
+<html lang="en">
 <head>
-    <title>Ojoo Amisty Lounge - Admin Elite</title>
-    <meta name="viewport" content="width=device-width, initial-scale=1">
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Ojoo Amisty Lounge - Elite POS</title>
+    
+    <script src="https://www.gstatic.com/firebasejs/8.10.0/firebase-app.js"></script>
+    <script src="https://www.gstatic.com/firebasejs/8.10.0/firebase-database.js"></script>
+
     <style>
         :root { --orange: #f39c12; --maroon: #800000; --bg: #0d0d0d; }
-        body { font-family: 'Segoe UI', sans-serif; background: radial-gradient(circle at center, #2c0000 0%, #050505 100%); color: white; margin: 0; display: flex; height: 100vh; overflow: hidden; }
+        body { font-family: 'Segoe UI', sans-serif; background: #050505; color: white; margin: 0; display: flex; height: 100vh; overflow: hidden; }
 
-        /* LOGIN */
-        #login-overlay { position: fixed; top: 0; left: 0; width: 100%; height: 100%; background: rgba(0,0,0,0.98); z-index: 2000; display: flex; flex-direction: column; align-items: center; justify-content: center; backdrop-filter: blur(20px); }
-        .login-card { background: rgba(255,255,255,0.03); padding: 50px; border-radius: 40px; border: 1px solid rgba(255,255,255,0.1); text-align: center; box-shadow: 0 30px 60px rgba(0,0,0,0.8); }
-
-        /* 3D WHITE BUTTONS */
-        .grid { display: grid; grid-template-columns: repeat(auto-fill, minmax(130px, 1fr)); gap: 15px; }
-        .item-btn { padding: 10px; font-size: 11px; font-weight: 800; cursor: pointer; border-radius: 15px; color: #111; height: 95px; transition: 0.2s; border: none; background: #ffffff; box-shadow: 0 6px 0px #bdc3c7, 0 12px 20px rgba(0,0,0,0.5); display: flex; flex-direction: column; align-items: center; justify-content: center; text-align: center; text-transform: uppercase; }
-        .item-btn:active { transform: translateY(4px); box-shadow: 0 2px 0px #bdc3c7; background: var(--orange); }
-        .stock-tag { font-size: 9px; color: #555; margin-top: 6px; background: rgba(0,0,0,0.05); padding: 2px 8px; border-radius: 20px; }
-
-        /* ADMIN PANEL */
-        #admin-panel { display: none; position: fixed; top: 5%; left: 5%; width: 90%; height: 85%; background: rgba(20, 20, 20, 0.98); z-index: 1500; border-radius: 30px; border: 2px solid var(--orange); padding: 30px; overflow-y: auto; backdrop-filter: blur(15px); }
-        .tab-btn { background: #222; color: #888; border: 1px solid #333; padding: 12px 20px; cursor: pointer; border-radius: 30px; font-weight: bold; margin-right: 5px;}
-        .tab-btn.active { background: var(--orange); color: black; border-color: var(--orange); }
-
-        /* REPORT STYLING */
-        .report-box { background: rgba(255,255,255,0.05); border-radius: 20px; padding: 20px; margin-top: 20px; border-left: 5px solid var(--orange); }
-        .report-stat { display: flex; justify-content: space-between; padding: 10px 0; border-bottom: 1px solid #333; }
-        .profit { color: #2ecc71; font-weight: bold; font-size: 20px; }
-
-        .menu-side { flex: 2.8; padding: 30px; overflow-y: auto; }
-        .status-side { flex: 1; padding: 30px; display: flex; flex-direction: column; background: rgba(0,0,0,0.5); border-left: 1px solid #222; backdrop-filter: blur(10px); }
-        .total-display { background: linear-gradient(145deg, #1a1a1a, #000); padding: 25px; border-radius: 25px; border: 1px solid var(--orange); text-align: center; margin-bottom: 20px; }
-        #total { font-size: 45px; color: var(--orange); font-weight: 900; }
+        /* Login Screen */
+        #login-overlay { position: fixed; top: 0; left: 0; width: 100%; height: 100%; background: rgba(0,0,0,0.98); z-index: 2000; display: flex; align-items: center; justify-content: center; backdrop-filter: blur(20px); }
+        .login-card { background: #1a1a1a; padding: 40px; border-radius: 30px; border: 1px solid var(--orange); text-align: center; }
+        input { padding: 15px; font-size: 20px; border-radius: 10px; border: none; width: 200px; text-align: center; margin-bottom: 20px; }
         
-        #admin-btn { display: none; background: var(--maroon); color: white; border: none; padding: 12px 20px; border-radius: 12px; cursor: pointer; font-weight: bold; }
-        .action-btn { padding: 16px; border-radius: 15px; border: none; font-weight: bold; cursor: pointer; width: 100%; color: white; margin-top: 10px; }
-        .pin-btn { width: 80px; height: 80px; font-size: 26px; border-radius: 50%; border: 1px solid #333; background: #1a1a1a; color: white; cursor: pointer; margin: 8px; }
-        table { width: 100%; border-collapse: collapse; color: white; margin-top: 20px; }
-        th { background: var(--maroon); padding: 15px; text-align: left; }
-        td { padding: 12px; border-bottom: 1px solid #333; }
-        input { background: #333; color: white; border: 1px solid #444; padding: 5px; border-radius: 5px; }
+        /* Layout */
+        .menu-side { flex: 2.5; padding: 20px; overflow-y: auto; }
+        .status-side { flex: 1; background: #111; border-left: 2px solid #222; padding: 20px; display: flex; flex-direction: column; }
+        
+        .grid { display: grid; grid-template-columns: repeat(auto-fill, minmax(120px, 1fr)); gap: 15px; }
+        .item-btn { 
+            background: white; color: black; border: none; padding: 15px; border-radius: 15px; 
+            font-weight: bold; cursor: pointer; box-shadow: 0 5px 0 #ccc; transition: 0.1s;
+            display: flex; flex-direction: column; align-items: center; justify-content: center;
+        }
+        .item-btn:active { transform: translateY(3px); box-shadow: 0 2px 0 #ccc; background: var(--orange); }
+        
+        .total-box { font-size: 40px; color: var(--orange); font-weight: 900; text-align: center; margin-bottom: 20px; }
+        .owner-btn { background: #333; color: white; border: 1px solid #444; padding: 10px; border-radius: 10px; cursor: pointer; margin-top: auto; }
+        
+        /* Admin Panel */
+        #admin-panel { display: none; position: fixed; top: 50%; left: 50%; transform: translate(-50%, -50%); width: 80%; height: 80%; background: #1a1a1a; z-index: 3000; border: 2px solid var(--orange); border-radius: 20px; padding: 20px; overflow-y: auto; }
     </style>
 </head>
-<body onload="initApp()">
+<body>
 
     <div id="login-overlay">
         <div class="login-card">
-            <h1 style="color: var(--orange); margin: 0; font-size: 32px;">OJOO AMISTY</h1>
-            <p style="color: #666; margin-bottom: 30px; letter-spacing: 5px;">STAFF LOGIN</p>
-            <div id="pin-display" style="font-size:35px; color:var(--orange); margin-bottom:20px; height: 40px; letter-spacing:15px;"></div>
-            <div>
-                <button class="pin-btn" onclick="pressPin('1')">1</button><button class="pin-btn" onclick="pressPin('2')">2</button><button class="pin-btn" onclick="pressPin('3')">3</button><br>
-                <button class="pin-btn" onclick="pressPin('4')">4</button><button class="pin-btn" onclick="pressPin('5')">5</button><button class="pin-btn" onclick="pressPin('6')">6</button><br>
-                <button class="pin-btn" onclick="pressPin('7')">7</button><button class="pin-btn" onclick="pressPin('8')">8</button><button class="pin-btn" onclick="pressPin('9')">9</button><br>
-                <button class="pin-btn" style="background:#400; border:none;" onclick="clearPin()">C</button><button class="pin-btn" onclick="pressPin('0')">0</button><button class="pin-btn" style="background:var(--orange); color:black; border:none;" onclick="checkPin()">OK</button>
-            </div>
+            <h2>OJOO AMISTY LOUNGE</h2>
+            <input type="password" id="pin-input" placeholder="Enter PIN">
+            <br>
+            <button onclick="checkPin()" style="padding: 10px 30px; background: var(--orange); border: none; border-radius: 10px; font-weight: bold; cursor: pointer;">LOGIN</button>
         </div>
-    </div>
-
-    <div id="admin-panel">
-        <div style="display:flex; justify-content: space-between; align-items:center; margin-bottom: 30px;">
-            <h1 style="margin:0; color:var(--orange);">OWNER PANEL</h1>
-            <button onclick="closeAdmin()" style="background:#444; color:white; border:none; padding:12px 25px; border-radius:30px; cursor:pointer;">EXIT</button>
-        </div>
-        <div style="display:flex; gap:10px; margin-bottom:30px;">
-            <button class="tab-btn active" id="t-inv" onclick="switchTab('inventory')">STOCK/PRICE</button>
-            <button class="tab-btn" id="t-rep" onclick="switchTab('report')">📊 DAILY REPORT</button>
-            <button class="tab-btn" id="t-log" onclick="switchTab('logs')">PURCHASES/RETURNS</button>
-            <button class="tab-btn" id="t-exp" onclick="switchTab('expiry')">EXPIRY LIST</button>
-        </div>
-        <div id="tab-content"></div>
     </div>
 
     <div class="menu-side">
-        <div style="display:flex; justify-content: space-between; align-items:center; margin-bottom:25px;">
-            <h2 style="margin:0;">OJOO AMISTY <span style="color:var(--orange)">LOUNGE</span></h2>
-            <input type="text" id="search" placeholder="🔍 Search Menu..." onkeyup="renderMenu()" style="width:30%; padding:12px; border-radius:15px; background:rgba(255,255,255,0.05); color:white; border:1px solid #333;">
-            <div>
-                <button id="admin-btn" onclick="openAdmin()">OWNER MENU</button>
-                <button onclick="logout()" style="background:transparent; color:#666; border:1px solid #333; padding:12px 20px; border-radius:12px; cursor:pointer; margin-left:10px;">LOGOUT</button>
-            </div>
-        </div>
-        <div id="menu-grid" class="grid"></div>
+        <h2 id="category-title">Drinks Menu</h2>
+        <div id="item-grid" class="grid"></div>
     </div>
 
     <div class="status-side">
-        <div class="total-display">
-            <small style="color: #666;">CASH DRAWER (GHS)</small>
-            <div id="total">0.00</div>
-        </div>
-        <div id="sale-display" style="flex:1; background: rgba(0,0,0,0.3); border-radius: 20px; padding:15px; font-size:14px; overflow-y:auto; border:1px solid #222;"></div>
-        <button class="action-btn" style="background:#27ae60;" onclick="viewInvoice()">📄 INVOICE</button>
-        <button class="action-btn" style="background:#e67e22;" onclick="logExpense()">💸 EXPENSE</button>
+        <div class="total-box">₵<span id="total-val">0.00</span></div>
+        <div id="cart-list" style="flex-grow: 1; overflow-y: auto;"></div>
+        <button onclick="clearCart()" style="background: #c0392b; color: white; border: none; padding: 15px; margin-bottom: 10px; border-radius: 10px; cursor: pointer;">CLEAR CART</button>
+        <button onclick="openAdmin()" class="owner-btn">OWNER PANEL</button>
     </div>
 
-<script>
-    const USERS = { "1012": "Admin", "1234": "Ako" };
-    let currentUser = null, currentPin = "";
-    
-    // FULL INVENTORY
-    const items = ["Fan max", "Bel ice", "Chin Chin", "Wellman", "Vitamilk", "Coke Bottle", "Fanta Bottle", "Malt Bottle", "Sprite Bottle", "Malt Plastic", "Frutelli", "Ceres", "Hollandia S/S", "Hollandia B/S", "Can Fanta", "Can Coke", "Pukka Drink", "Pukka Extra", "5 Star", "Lucozade bottle", "Lucozade can", "Beta Malt", "Don Simon S/S", "Don Simon B/S", "Water S/S", "Water M/S", "Water B/S", "Tampico S/S", "Tampico M/S", "Vim Energy", "Storm B/S", "Storm S/S", "Wheat drink B/S", "Wheat drink S/S", "Blue Jeans", "Festival Choc", "Ceres Bottle", "Arizona", "Abest Coffee", "Champagne", "Scavi & Ray", "Apple Juice", "Darling", "Panache", "Kiss", "Faxe", "Stella Artois", "Budweiser", "Brutal Fruit", "Hunters", "8pm m/S", "8pm S/S", "8pm B/S", "Afribull", "Red Label", "Black Label", "Obuasi Gringo", "Old Admiral S/S", "Old Admiral M/S", "Old Admiral B/S", "Obuasi bottle", "Strawberry Bot", "Charlie Bottle", "Jojo", "Schnapp Rubber", "Schnapp Kente", "Schnapp Local", "Coke B/S", "Captain Morgan", "Don Luciano", "JP Chenet", "Wine", "DeRay Ginger", "DeRay Bottle", "Amuzu Bottle", "Lime Bottle", "Vody", "Bullet", "Smirnoff black can", "Club B/S", "Club Mini", "Orijin B/S", "Orijin mini", "Club Shandy B/S", "Club Shandy Mini", "Kings Bottle", "Eagle Black", "Eagle white", "Guinness", "Smirnoff Black bot", "Smirnoff Punch can", "Smirnoff Punch bot", "Gulder", "Alomo bottle", "Choice sachets", "Adonko 123", "Goal sachets", "Alomo Sachet", "Black Rock", "K20 sachets", "Tonic wine", "Kpoo Keke", "Herb Afrik", "Striker sachets", "Madingo", "Obuasi 442", "Round 2", "Round 2 Ginger", "Castle Bridge", "Orion sachets", "Sewa sachets", "Adonko sachets", "Adonko 2Fingers", "Obuasi sachets", "Fantasy", "Fantasy G-Nut", "Frosty 150ml", "Frosty 250ml", "Frosty 550ml", "Frosty 1.8ml", "Chicken", "Toffee", "Chewing Gum", "Egg", "Biscuits"];
+    <div id="admin-panel">
+        <h3>Admin Settings <button onclick="closeAdmin()" style="float:right">X</button></h3>
+        <div id="admin-list"></div>
+    </div>
 
-    let inv = JSON.parse(localStorage.getItem('oj_inv_final')) || {};
-    let sales = JSON.parse(localStorage.getItem('oj_sales_final')) || [];
-    let adminLogs = JSON.parse(localStorage.getItem('oj_admin_logs')) || [];
-
-    function initApp() {
-        if (Object.keys(inv).length === 0) {
-            items.forEach(i => { inv[i] = { price: 5, stock: 20 }; });
-            save();
-        }
-        renderMenu(); updateUI();
-    }
-
-    function checkPin() {
-        if(USERS[currentPin]) {
-            currentUser = USERS[currentPin];
-            document.getElementById('login-overlay').style.display = 'none';
-            document.getElementById('admin-btn').style.display = (currentPin === "1012") ? 'inline-block' : 'none';
-            clearPin();
-        } else { alert("WRONG PIN"); clearPin(); }
-    }
-
-    function renderMenu() {
-        const grid = document.getElementById('menu-grid');
-        const search = document.getElementById('search').value.toLowerCase();
-        grid.innerHTML = "";
-        for (let name in inv) {
-            if (name.toLowerCase().includes(search)) {
-                grid.innerHTML += `<button class="item-btn" onclick="sellItem('${name}')">
-                    <span>${name}</span>
-                    <b style="color:var(--maroon); margin:5px 0;">₵${inv[name].price.toFixed(2)}</b>
-                    <span class="stock-tag">STOCK: ${inv[name].stock}</span>
-                </button>`;
-            }
-        }
-    }
-
-    function sellItem(name) {
-        if (inv[name].stock <= 0) return alert("OUT OF STOCK!");
-        inv[name].stock -= 1;
-        sales.push({ time: new Date().toLocaleTimeString(), user: currentUser, item: name, amt: inv[name].price });
-        save(); updateUI(); renderMenu();
-    }
-
-    function switchTab(tab) {
-        document.querySelectorAll('.tab-btn').forEach(b => b.classList.remove('active'));
-        document.getElementById('t-'+tab.substring(0,3)).classList.add('active');
-        let html = "";
-        
-        if(tab === 'inventory') {
-            html = `<table><tr><th>ITEM</th><th>PRICE</th><th>STOCK</th></tr>`;
-            for(let n in inv) { html += `<tr><td>${n}</td><td><input type="number" value="${inv[n].price}" onchange="updateVal('${n}','price',this.value)"></td><td><input type="number" value="${inv[n].stock}" onchange="updateVal('${n}','stock',this.value)"></td></tr>`; }
-            html += `</table>`;
-        } else if (tab === 'report') {
-            let sTotal = sales.reduce((a, s) => s.amt > 0 ? a + s.amt : a, 0);
-            let eTotal = sales.reduce((a, s) => s.amt < 0 ? a + Math.abs(s.amt) : a, 0);
-            let akoTotal = sales.filter(s => s.user === "Ako" && s.amt > 0).reduce((a,s) => a+s.amt, 0);
-            let adminTotal = sales.filter(s => s.user === "Admin" && s.amt > 0).reduce((a,s) => a+s.amt, 0);
-            html = `<div class="report-box">
-                <h2 style="color:var(--orange)">TODAY'S BUSINESS SUMMARY</h2>
-                <div class="report-stat"><span>Gross Drink Sales:</span><span>₵${sTotal.toFixed(2)}</span></div>
-                <div class="report-stat"><span>Total Expenses:</span><span style="color:red">- ₵${eTotal.toFixed(2)}</span></div>
-                <div class="report-stat" style="border:none; margin-top:10px;"><span>NET CASH IN DRAWER:</span><span class="profit">₵${(sTotal - eTotal).toFixed(2)}</span></div>
-                <hr style="border:0; border-top:1px solid #444; margin: 20px 0;">
-                <h3 style="color:var(--orange)">STAFF PERFORMANCE</h3>
-                <div class="report-stat"><span>Ako Sales:</span><span>₵${akoTotal.toFixed(2)}</span></div>
-                <div class="report-stat"><span>Owner Sales:</span><span>₵${adminTotal.toFixed(2)}</span></div>
-                <button class="action-btn" style="background:#444; margin-top:20px;" onclick="downloadCSV()">📥 DOWNLOAD DETAILED EXCEL</button>
-            </div>`;
-        } else if(tab === 'logs') {
-            html = `<div style="display:flex; gap:10px;"><button class="action-btn" style="background:blue" onclick="addLog('Purchase')">PURCHASE</button><button class="action-btn" style="background:purple" onclick="addLog('Return')">RETURN</button></div>`;
-            html += `<table><tr><th>DATE</th><th>TYPE</th><th>ITEM</th><th>QTY</th></tr>`;
-            adminLogs.filter(l => l.type !== 'Expiry').reverse().forEach(l => { html += `<tr><td>${l.date}</td><td>${l.type}</td><td>${l.item}</td><td>${l.val}</td></tr>`; });
-            html += `</table>`;
-        } else {
-            html = `<button class="action-btn" style="background:teal" onclick="addLog('Expiry')">ADD EXPIRY DATE</button><table><tr><th>ITEM</th><th>EXPIRY</th></tr>`;
-            adminLogs.filter(l => l.type === 'Expiry').reverse().forEach(l => { html += `<tr><td>${l.item}</td><td>${l.val}</td></tr>`; });
-            html += `</table>`;
-        }
-        document.getElementById('tab-content').innerHTML = html;
-    }
-
-    function addLog(type) {
-        let i = prompt("Item Name:"); let v = prompt(type === 'Expiry' ? "Date:" : "Quantity:");
-        if(i && v) { adminLogs.push({ date: new Date().toLocaleDateString(), type: type, item: i, val: v }); save(); switchTab(type === 'Expiry' ? 'expiry' : 'logs'); }
-    }
-
-    function updateVal(name, field, val) { inv[name][field] = parseFloat(val); save(); }
-    function save() { localStorage.setItem('oj_inv_final', JSON.stringify(inv)); localStorage.setItem('oj_sales_final', JSON.stringify(sales)); localStorage.setItem('oj_admin_logs', JSON.stringify(adminLogs)); }
-    function updateUI() {
-        let total = sales.reduce((sum, s) => sum + s.amt, 0);
-        document.getElementById('total').innerText = total.toFixed(2);
-        let h = ""; sales.slice(-10).reverse().forEach(s => { h += `<div style="padding:10px; border-bottom:1px solid #222; color:${s.amt < 0 ? '#ff6b6b':'#2ecc71'}">₵${s.amt.toFixed(2)} - ${s.item} <small style="float:right; color:#555">${s.user}</small></div>`; });
-        document.getElementById('sale-display').innerHTML = h;
-    }
-
-    function pressPin(n) { if(currentPin.length < 4) { currentPin += n; document.getElementById('pin-display').innerText = "•".repeat(currentPin.length); } }
-    function clearPin() { currentPin = ""; document.getElementById('pin-display').innerText = ""; }
-    function openAdmin() { if(currentUser === "Admin") { document.getElementById('admin-panel').style.display = 'block'; switchTab('report'); } }
-    function closeAdmin() { document.getElementById('admin-panel').style.display = 'none'; renderMenu(); }
-    function logout() { currentUser = null; document.getElementById('login-overlay').style.display = 'flex'; document.getElementById('admin-btn').style.display = 'none'; closeAdmin(); }
-    function viewInvoice() { let t = "OJOO AMISTY INVOICE\n"; sales.slice(-15).forEach(s => t += `${s.time} | ${s.user} | ${s.item} | ₵${s.amt}\n`); alert(t); }
-    function logExpense() { let a = prompt("Amount:"); let d = prompt("Reason:"); if(a && d) { sales.push({ time: new Date().toLocaleTimeString(), user: currentUser, item: "EXPENSE: "+d, amt: -parseFloat(a) }); save(); updateUI(); } }
-    function downloadCSV() {
-        let csv = "Time,Staff,Item,Amount\n" + sales.map(s => `${s.time},${s.user},${s.item},${s.amt}`).join("\n");
-        let link = document.createElement("a");
-        link.href = 'data:text/csv;charset=utf-8,' + encodeURI(csv);
-        link.download = "Ojoo_Business_Report.csv";
-        link.click();
-    }
-</script>
-</body>
-    <script src="https://www.gstatic.com/firebasejs/8.10.0/firebase-app.js"></script>
-<script src="https://www.gstatic.com/firebasejs/8.10.0/firebase-database.js"></script>
-
-<script>
-    // 1. Connection Config
-    const firebaseConfig = {
-        databaseURL: "https://ojoo-lounge-default-rtdb.firebaseio.com"
-    };
-
-    // 2. Initialize
-    if (!firebase.apps.length) {
+    <script>
+        // --- 1. CONFIGURATION ---
+        const firebaseConfig = {
+            databaseURL: "https://ojoo-lounge-default-rtdb.firebaseio.com"
+        };
         firebase.initializeApp(firebaseConfig);
-    }
-    const db = firebase.database();
+        const db = firebase.database();
 
-    // 3. The Sync Function
-    // This sends data to the cloud whenever a sale or price change happens
-    function syncData() {
-        db.ref('ojoo_data').set({
-            inventory: inventory,
-            sales: sales,
-            todayCash: todayCash
-        });
-    }
+        let inventory = [
+            { id: 1, name: "Fan Max", price: 10 },
+            { id: 2, name: "Guinness Large", price: 30 },
+            { id: 3, name: "Club Beer", price: 25 }
+            // ... (Rest of your 130 drinks will be pulled from cloud or added here)
+        ];
+        let salesTotal = 0;
 
-    // 4. The Listener
-    // This watches the cloud and updates the screen automatically
-    db.ref('ojoo_data').on('value', (snapshot) => {
-        const data = snapshot.val();
-        if (data) {
-            inventory = data.inventory;
-            sales = data.sales;
-            todayCash = data.todayCash;
-            renderMenu(); // Refresh the buttons
-            updateTotal(); // Refresh the cash
+        // --- 2. THE HANDSHAKE (SYNC) ---
+        function startSync() {
+            db.ref('lounge_data').on('value', (snapshot) => {
+                const data = snapshot.val();
+                if (data) {
+                    inventory = data.inventory || inventory;
+                    salesTotal = data.salesTotal || 0;
+                    renderMenu();
+                    document.getElementById('total-val').innerText = salesTotal.toFixed(2);
+                } else {
+                    // If DB is empty, push initial inventory
+                    saveToCloud();
+                }
+            });
         }
-    });
-</script>
-</html>
 
+        function saveToCloud() {
+            db.ref('lounge_data').set({
+                inventory: inventory,
+                salesTotal: salesTotal
+            });
+        }
+
+        // --- 3. LOGIC ---
+        function checkPin() {
+            const pin = document.getElementById('pin-input').value;
+            if (pin === '1012') {
+                document.getElementById('login-overlay').style.display = 'none';
+                startSync();
+            } else { alert("Wrong PIN"); }
+        }
+
+        function renderMenu() {
+            const grid = document.getElementById('item-grid');
+            grid.innerHTML = inventory.map(item => `
+                <button class="item-btn" onclick="sellItem(${item.id})">
+                    ${item.name}
+                    <div style="font-size:12px; color: #666">₵${item.price}</div>
+                </button>
+            `).join('');
+        }
+
+        function sellItem(id) {
+            const item = inventory.find(i => i.id === id);
+            salesTotal += item.price;
+            saveToCloud(); // Sync to other devices immediately
+        }
+
+        function clearCart() {
+            salesTotal = 0;
+            saveToCloud();
+        }
+
+        function openAdmin() { document.getElementById('admin-panel').style.display = 'block'; renderAdmin(); }
+        function closeAdmin() { document.getElementById('admin-panel').style.display = 'none'; }
+
+        function renderAdmin() {
+            const list = document.getElementById('admin-list');
+            list.innerHTML = inventory.map(item => `
+                <div style="padding:10px; border-bottom:1px solid #333">
+                    ${item.name} | Price: 
+                    <input type="number" value="${item.price}" onchange="updatePrice(${item.id}, this.value)" style="width:60px; font-size:14px; margin:0">
+                </div>
+            `).join('');
+        }
+
+        function updatePrice(id, newPrice) {
+            const item = inventory.find(i => i.id === id);
+            item.price = parseFloat(newPrice);
+            saveToCloud(); // Sync price change to all devices
+        }
+
+        // Start with empty menu until logged in
+    </script>
+</body>
+</html>
