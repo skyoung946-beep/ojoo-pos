@@ -5,14 +5,23 @@
     <meta name="viewport" content="width=device-width, initial-scale=1">
     <script src="https://www.gstatic.com/firebasejs/8.10.0/firebase-app.js"></script>
     <script src="https://www.gstatic.com/firebasejs/8.10.0/firebase-database.js"></script>
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/xlsx/0.18.5/xlsx.full.min.js"></script>
+    
     <style>
         :root { --orange: #f39c12; --bg: #0d0d0d; }
         body { font-family: 'Segoe UI', sans-serif; background: #050505; color: white; margin: 0; display: flex; height: 100vh; overflow: hidden; }
 
+        /* PIN PAD LOGIN */
+        #login-overlay { position: fixed; inset: 0; background: #000; z-index: 9999; display: flex; flex-direction: column; align-items: center; justify-content: center; }
+        .pin-display { background: #222; padding: 20px; width: 200px; text-align: center; font-size: 30px; margin-bottom: 20px; border-radius: 10px; border: 2px solid var(--orange); height: 40px; }
+        .pin-grid { display: grid; grid-template-columns: repeat(3, 1fr); gap: 15px; }
+        .pin-btn { width: 70px; height: 70px; border-radius: 50%; border: 1px solid #444; background: #111; color: white; font-size: 24px; cursor: pointer; }
+        .pin-btn:active { background: var(--orange); color: black; }
+
         /* SIDEBAR */
         .sidebar { width: 220px; background: #111; border-right: 1px solid #333; display: flex; flex-direction: column; padding: 20px; flex-shrink: 0; }
-        .nav-btn { background: none; border: 1px solid #222; color: #777; padding: 12px; margin-bottom: 8px; border-radius: 8px; cursor: pointer; text-align: left; font-size: 13px; font-weight: bold; transition: 0.3s; }
-        .nav-btn.active { background: var(--orange); color: black; border-color: var(--orange); box-shadow: 0 0 15px rgba(243, 156, 18, 0.2); }
+        .nav-btn { background: none; border: 1px solid #222; color: #777; padding: 12px; margin-bottom: 8px; border-radius: 8px; cursor: pointer; text-align: left; font-size: 13px; font-weight: bold; }
+        .nav-btn.active { background: var(--orange); color: black; }
 
         /* MAIN */
         .main-content { flex: 1; display: flex; flex-direction: column; overflow: hidden; }
@@ -22,85 +31,74 @@
         .page-content { flex: 1; padding: 20px; overflow-y: auto; display: none; }
         .page-content.active { display: block; }
 
-        /* CATEGORY TABS */
-        .cat-bar { display: flex; gap: 10px; margin-bottom: 20px; overflow-x: auto; padding-bottom: 5px; }
-        .cat-tab { background: #222; color: white; border: none; padding: 8px 15px; border-radius: 20px; cursor: pointer; white-space: nowrap; font-size: 12px; }
-        .cat-tab.active { background: white; color: black; font-weight: bold; }
-
         /* POS GRID */
-        .grid { display: grid; grid-template-columns: repeat(auto-fill, minmax(120px, 1fr)); gap: 12px; }
-        .item-btn { 
-            padding: 12px; font-weight: 800; border-radius: 12px; color: #111; height: 90px; border: none; 
-            background: #ffffff; box-shadow: 0 4px 0 #bdc3c7; cursor: pointer; font-size: 11px; 
-            display: flex; flex-direction: column; align-items: center; justify-content: center; text-align: center;
-        }
-        .item-btn:active { transform: translateY(2px); box-shadow: 0 2px 0 #bdc3c7; }
-
-        /* TABLES */
-        table { width: 100%; border-collapse: collapse; background: #111; border-radius: 10px; overflow: hidden; }
-        th, td { padding: 12px; text-align: left; border-bottom: 1px solid #222; font-size: 13px; }
-        input { background: #1a1a1a; border: 1px solid #333; color: white; padding: 6px; border-radius: 4px; }
-
-        #login-overlay { position: fixed; inset: 0; background: #000; z-index: 9999; display: flex; align-items: center; justify-content: center; }
+        .cat-bar { display: flex; gap: 10px; margin-bottom: 20px; overflow-x: auto; padding-bottom: 5px; }
+        .cat-tab { background: #222; color: white; border: none; padding: 8px 15px; border-radius: 20px; cursor: pointer; }
+        .cat-tab.active { background: white; color: black; }
+        
+        .grid { display: grid; grid-template-columns: repeat(auto-fill, minmax(110px, 1fr)); gap: 10px; }
+        .item-btn { padding: 10px; font-weight: 800; border-radius: 12px; color: #111; height: 85px; border: none; background: #fff; box-shadow: 0 4px #bdc3c7; cursor: pointer; font-size: 11px; }
     </style>
 </head>
 <body>
 
 <div id="login-overlay">
-    <div style="text-align:center;">
-        <h2 style="letter-spacing:3px; color:var(--orange);">OJOO AMISTY LOUNGE</h2>
-        <input type="password" id="pin-input" placeholder="ACCESS PIN" style="padding:15px; text-align:center; font-size:20px; width:220px; border-radius:10px;">
-        <br><br>
-        <button onclick="checkPin()" style="padding:15px 60px; background:var(--orange); border:none; border-radius:10px; font-weight:bold; cursor:pointer;">LOGIN</button>
+    <h2 style="color:var(--orange)">OJOO AMISTY MASTER</h2>
+    <div class="pin-display" id="pin-view">****</div>
+    <div class="pin-grid">
+        <button class="pin-btn" onclick="pressPin('1')">1</button>
+        <button class="pin-btn" onclick="pressPin('2')">2</button>
+        <button class="pin-btn" onclick="pressPin('3')">3</button>
+        <button class="pin-btn" onclick="pressPin('4')">4</button>
+        <button class="pin-btn" onclick="pressPin('5')">5</button>
+        <button class="pin-btn" onclick="pressPin('6')">6</button>
+        <button class="pin-btn" onclick="pressPin('7')">7</button>
+        <button class="pin-btn" onclick="pressPin('8')">8</button>
+        <button class="pin-btn" onclick="pressPin('9')">9</button>
+        <button class="pin-btn" style="color:red" onclick="typedPin=''">C</button>
+        <button class="pin-btn" onclick="pressPin('0')">0</button>
+        <button class="pin-btn" style="color:green" onclick="checkPin()">OK</button>
     </div>
 </div>
 
 <div class="sidebar">
-    <h3 style="color:var(--orange); font-size:16px;">MASTER PANEL</h3>
-    <button onclick="showPage('sales-page')" class="nav-btn active" id="btn-sales">POS TERMINAL</button>
-    <button onclick="showPage('inventory-page')" class="nav-btn" id="btn-inv">INVENTORY & PRICES</button>
-    <button onclick="showPage('expenses-page')" class="nav-btn" id="btn-exp">EXPENSES</button>
-    <button onclick="showPage('reports-page')" class="nav-btn" id="btn-rep">REPORTS</button>
+    <button onclick="showPage('sales-page')" class="nav-btn active">POS TERMINAL</button>
+    <button onclick="showPage('inventory-page')" class="nav-btn">PRICES/INVENTORY</button>
+    <button onclick="showPage('expenses-page')" class="nav-btn">EXPENSES</button>
+    <button onclick="showPage('reports-page')" class="nav-btn">REPORTS / EXCEL</button>
 </div>
 
 <div class="main-content">
     <div class="header">
-        <h3 id="page-title" style="margin:0; color:#555;">Sales</h3>
-        <div><span style="font-size:14px; color:#555;">TOTAL:</span> <span id="total-val">₵0.00</span></div>
+        <h3 id="page-title">Sales</h3>
+        <div id="total-val">₵0.00</div>
     </div>
 
     <div id="sales-page" class="page-content active">
-        <div class="cat-bar" id="cat-tabs-ui">
-            </div>
+        <div class="cat-bar" id="cat-tabs-ui"></div>
         <div id="item-grid" class="grid"></div>
     </div>
 
     <div id="inventory-page" class="page-content">
-        <h3>Master Price List</h3>
-        <table id="inv-table">
-            <thead><tr><th>Item</th><th>Price (₵)</th></tr></thead>
-            <tbody id="inventory-body"></tbody>
-        </table>
+        <h3>Master Price List (Set Prices Here)</h3>
+        <table style="width:100%"><tbody id="inventory-body"></tbody></table>
     </div>
 
     <div id="expenses-page" class="page-content">
-        <h3>Daily Expenses</h3>
-        <input type="text" id="exp-name" placeholder="Reason (e.g. Electricity)">
+        <h3>Record Expense</h3>
+        <input type="text" id="exp-name" placeholder="Item">
         <input type="number" id="exp-amt" placeholder="Amount">
-        <button onclick="addExp()" style="background:var(--orange); padding:8px 20px; border:none; border-radius:5px;">Add</button>
-        <table style="margin-top:20px;"><tbody id="exp-body"></tbody></table>
+        <button onclick="addExp()" style="background:var(--orange); border:none; padding:10px;">Add</button>
     </div>
 
     <div id="reports-page" class="page-content">
-        <div style="background:#111; padding:30px; border-radius:15px; border:1px solid #333;">
-            <h2>Daily Summary</h2>
-            <p>Total Revenue: <span id="rep-rev" style="color:var(--orange)">₵0.00</span></p>
-            <p>Total Expenses: <span id="rep-exp" style="color:red">₵0.00</span></p>
-            <hr style="border-color:#222">
-            <h1>Net Profit: <span id="rep-net" style="color:#2ecc71">₵0.00</span></h1>
+        <h3>Daily Report</h3>
+        <div style="background:#111; padding:20px; border-radius:10px;">
+            <p>Sales: <span id="rep-rev">0</span></p>
+            <p>Expenses: <span id="rep-exp">0</span></p>
+            <button onclick="exportToExcel()" style="background:#2ecc71; color:white; padding:15px; border:none; width:100%; cursor:pointer; font-weight:bold;">DOWNLOAD EXCEL REPORT</button>
         </div>
-        <br>
-        <button onclick="resetDay()" style="color:grey; background:none; border:1px solid #333; padding:10px; cursor:pointer;">Reset All Data for New Day</button>
+        <button onclick="resetDay()" style="margin-top:50px; background:none; color:red; border:1px solid red;">RESET SYSTEM FOR NEW DAY</button>
     </div>
 </div>
 
@@ -109,147 +107,109 @@
     firebase.initializeApp(firebaseConfig);
     const db = firebase.database();
 
+    let typedPin = "";
+    function pressPin(n) { typedPin += n; document.getElementById('pin-view').innerText = "*".repeat(typedPin.length); }
+    function checkPin() {
+        if (typedPin === '1012') { document.getElementById('login-overlay').style.display='none'; startSync(); }
+        else { alert("Wrong PIN"); typedPin = ""; document.getElementById('pin-view').innerText = "****"; }
+    }
+
     let inventory = [
-        // BEVERAGES
-        { id:1, name:"Fan Max", price:0, cat:"Beverages" }, { id:2, name:"Bel Ice", price:0, cat:"Beverages" },
-        { id:3, name:"Chin Chin", price:0, cat:"Beverages" }, { id:4, name:"Wellman", price:0, cat:"Beverages" },
-        { id:5, name:"Vitamilk", price:0, cat:"Beverages" }, { id:6, name:"Coke Bottle", price:0, cat:"Beverages" },
-        { id:7, name:"Fanta Bottle", price:0, cat:"Beverages" }, { id:8, name:"Malt Bottle", price:0, cat:"Beverages" },
-        { id:9, name:"Sprite Bottle", price:0, cat:"Beverages" }, { id:10, name:"Malt Plastic", price:0, cat:"Beverages" },
-        { id:11, name:"Frutelli", price:0, cat:"Beverages" }, { id:12, name:"Ceres", price:0, cat:"Beverages" },
-        { id:13, name:"Hollandia S/S", price:0, cat:"Beverages" }, { id:14, name:"Hollandia B/S", price:0, cat:"Beverages" },
-        { id:15, name:"Can Fanta", price:0, cat:"Beverages" }, { id:16, name:"Can Coke", price:0, cat:"Beverages" },
-        { id:17, name:"Pukka Drink", price:0, cat:"Beverages" }, { id:18, name:"Pukka Extra", price:0, cat:"Beverages" },
-        { id:19, name:"5 Star", price:0, cat:"Beverages" }, { id:20, name:"Lucozade Bottle", price:0, cat:"Beverages" },
-        { id:21, name:"Lucozade Can", price:0, cat:"Beverages" }, { id:22, name:"Beta Malt", price:0, cat:"Beverages" },
-        { id:23, name:"Don Simon S/S", price:0, cat:"Beverages" }, { id:24, name:"Don Simon B/S", price:0, cat:"Beverages" },
-        { id:25, name:"Water S/S", price:0, cat:"Beverages" }, { id:26, name:"Water M/S", price:0, cat:"Beverages" },
-        { id:27, name:"Water B/S", price:0, cat:"Beverages" }, { id:28, name:"Tampico S/S", price:0, cat:"Beverages" },
-        { id:29, name:"Tampico M/S", price:0, cat:"Beverages" }, { id:30, name:"Vim Energy", price:0, cat:"Beverages" },
-        { id:31, name:"Storm B/S", price:0, cat:"Beverages" }, { id:32, name:"Storm S/S", price:0, cat:"Beverages" },
-        { id:33, name:"Wheat B/S", price:0, cat:"Beverages" }, { id:34, name:"Wheat S/S", price:0, cat:"Beverages" },
-        { id:35, name:"Blue Jeans", price:0, cat:"Beverages" }, { id:36, name:"Festival Choc", price:0, cat:"Beverages" },
-        { id:37, name:"Ceres Bottle", price:0, cat:"Beverages" }, { id:38, name:"Arizona", price:0, cat:"Beverages" },
-        { id:39, name:"Abest Coffee", price:0, cat:"Beverages" }, { id:40, name:"Champagne", price:0, cat:"Beverages" },
-        { id:41, name:"Scavi & Ray", price:0, cat:"Beverages" }, { id:42, name:"Apple Juice", price:0, cat:"Beverages" },
-
-        // ALCOHOLIC
-        { id:43, name:"Darling", price:0, cat:"Alcoholic" }, { id:44, name:"Panache", price:0, cat:"Alcoholic" },
-        { id:45, name:"Kiss", price:0, cat:"Alcoholic" }, { id:46, name:"Faxe", price:0, cat:"Alcoholic" },
-        { id:47, name:"Stella Artois", price:0, cat:"Alcoholic" }, { id:48, name:"Budweiser", price:0, cat:"Alcoholic" },
-        { id:49, name:"Brutal Fruit", price:0, cat:"Alcoholic" }, { id:50, name:"Hunters", price:0, cat:"Alcoholic" },
-        { id:51, name:"8pm M/S", price:0, cat:"Alcoholic" }, { id:52, name:"8pm S/S", price:0, cat:"Alcoholic" },
-        { id:53, name:"8pm B/S", price:0, cat:"Alcoholic" }, { id:54, name:"Afribull", price:0, cat:"Alcoholic" },
-        { id:55, name:"Red Label", price:0, cat:"Alcoholic" }, { id:56, name:"Black Label", price:0, cat:"Alcoholic" },
-        { id:57, name:"Obuasi Gringo", price:0, cat:"Alcoholic" }, { id:58, name:"Old Admiral S/S", price:0, cat:"Alcoholic" },
-        { id:59, name:"Old Admiral M/S", price:0, cat:"Alcoholic" }, { id:60, name:"Old Admiral B/S", price:0, cat:"Alcoholic" },
-        { id:61, name:"Obuasi Bottle", price:0, cat:"Alcoholic" }, { id:62, name:"Strawberry Btl", price:0, cat:"Alcoholic" },
-        { id:63, name:"Charlie Btl", price:0, cat:"Alcoholic" }, { id:64, name:"Jojo", price:0, cat:"Alcoholic" },
-        { id:65, name:"Schnapp Rubr", price:0, cat:"Alcoholic" }, { id:66, name:"Schnapp Kente", price:0, cat:"Alcoholic" },
-        { id:67, name:"Schnapp Local", price:0, cat:"Alcoholic" }, { id:68, name:"Coke B/S", price:0, cat:"Alcoholic" },
-        { id:69, name:"Capt Morgan", price:0, cat:"Alcoholic" }, { id:70, name:"Don Luciano", price:0, cat:"Alcoholic" },
-        { id:71, name:"JP Chenet", price:0, cat:"Alcoholic" }, { id:72, name:"Wine", price:0, cat:"Alcoholic" },
-        { id:73, name:"DeRay Ginger", price:0, cat:"Alcoholic" }, { id:74, name:"DeRay Bottle", price:0, cat:"Alcoholic" },
-        { id:75, name:"Amuzu Bottle", price:0, cat:"Alcoholic" }, { id:76, name:"Lime Bottle", price:0, cat:"Alcoholic" },
-        { id:77, name:"Vody", price:0, cat:"Alcoholic" }, { id:78, name:"Bullet", price:0, cat:"Alcoholic" },
-        { id:79, name:"Smirnoff Can", price:0, cat:"Alcoholic" }, { id:80, name:"Club B/S", price:0, cat:"Alcoholic" },
-        { id:81, name:"Club Mini", price:0, cat:"Alcoholic" }, { id:82, name:"Orijin B/S", price:0, cat:"Alcoholic" },
-        { id:83, name:"Orijin Mini", price:0, cat:"Alcoholic" }, { id:84, name:"Shandy B/S", price:0, cat:"Alcoholic" },
-        { id:85, name:"Shandy Mini", price:0, cat:"Alcoholic" }, { id:86, name:"Kings Bottle", price:0, cat:"Alcoholic" },
-        { id:87, name:"Eagle Black", price:0, cat:"Alcoholic" }, { id:88, name:"Eagle White", price:0, cat:"Alcoholic" },
-        { id:89, name:"Guinness", price:0, cat:"Alcoholic" }, { id:90, name:"Smirnoff Btl", price:0, cat:"Alcoholic" },
-        { id:91, name:"Punch Can", price:0, cat:"Alcoholic" }, { id:92, name:"Punch Btl", price:0, cat:"Alcoholic" },
-        { id:93, name:"Gulder", price:0, cat:"Alcoholic" }, { id:94, name:"Alomo Btl", price:0, cat:"Alcoholic" },
-
-        // SACHETS
-        { id:95, name:"Choice Sac", price:0, cat:"Sachets" }, { id:96, name:"Adonko 123 Sac", price:0, cat:"Sachets" },
-        { id:97, name:"Goal Sac", price:0, cat:"Sachets" }, { id:98, name:"Alomo Sac", price:0, cat:"Sachets" },
-        { id:99, name:"Black Rock Sac", price:0, cat:"Sachets" }, { id:100, name:"K20 Sac", price:0, cat:"Sachets" },
-        { id:101, name:"Tonic Wine Sac", price:0, cat:"Sachets" }, { id:102, name:"Kpoo Keke Sac", price:0, cat:"Sachets" },
-        { id:103, name:"Herb Afrik Sac", price:0, cat:"Sachets" }, { id:104, name:"Striker Sac", price:0, cat:"Sachets" },
-        { id:105, name:"Madingo Sac", price:0, cat:"Sachets" }, { id:106, name:"Obuasi 442 Sac", price:0, cat:"Sachets" },
-        { id:107, name:"Round 2 Sac", price:0, cat:"Sachets" }, { id:108, name:"Rnd 2 Ginger", price:0, cat:"Sachets" },
-        { id:109, name:"Castle Bridge Sac", price:0, cat:"Sachets" }, { id:110, name:"Orion Sac", price:0, cat:"Sachets" },
-        { id:111, name:"Sewa Sac", price:0, cat:"Sachets" }, { id:112, name:"Adonko Sac", price:0, cat:"Sachets" },
-        { id:113, name:"Adonko 2 Fing", price:0, cat:"Sachets" }, { id:114, name:"Obuasi Sac", price:0, cat:"Sachets" },
-
-        // ICE CREAM & MISC
-        { id:115, name:"Fantasy", price:0, cat:"IceCream" }, { id:116, name:"Fantasy G-Nut", price:0, cat:"IceCream" },
-        { id:117, name:"Frosty 150ml", price:0, cat:"IceCream" }, { id:118, name:"Frosty 250ml", price:0, cat:"IceCream" },
-        { id:119, name:"Frosty 550ml", price:0, cat:"IceCream" }, { id:120, name:"Frosty 1.8ml", price:0, cat:"IceCream" },
-        { id:121, name:"Chicken", price:0, cat:"Misc" }, { id:122, name:"Toffee", price:0, cat:"Misc" },
-        { id:123, name:"Chewing Gum", price:0, cat:"Misc" }, { id:124, name:"Egg", price:0, cat:"Misc" },
-        { id:125, name:"Biscuits", price:0, cat:"Misc" }
-    ];
+        { name: "Fan max", cat: "Beverages", price: 0 }, { name: "Bel ice", cat: "Beverages", price: 0 },
+        { name: "Chin Chin", cat: "Beverages", price: 0 }, { name: "Wellman", cat: "Beverages", price: 0 },
+        { name: "Vitamilk", cat: "Beverages", price: 0 }, { name: "Coke Bottle", cat: "Beverages", price: 0 },
+        { name: "Fanta Bottle", cat: "Beverages", price: 0 }, { name: "Malt Bottle", cat: "Beverages", price: 0 },
+        { name: "Sprite Bottle", cat: "Beverages", price: 0 }, { name: "Malt Plastic", cat: "Beverages", price: 0 },
+        { name: "Frutelli", cat: "Beverages", price: 0 }, { name: "Ceres", cat: "Beverages", price: 0 },
+        { name: "Hollandia S/S", cat: "Beverages", price: 0 }, { name: "Hollandia B/S", cat: "Beverages", price: 0 },
+        { name: "Can Fanta", cat: "Beverages", price: 0 }, { name: "Can Coke", cat: "Beverages", price: 0 },
+        { name: "Pukka Drink", cat: "Beverages", price: 0 }, { name: "Pukka Extra", cat: "Beverages", price: 0 },
+        { name: "5 Star", cat: "Beverages", price: 0 }, { name: "Lucozade bottle", cat: "Beverages", price: 0 },
+        { name: "Lucozade can", cat: "Beverages", price: 0 }, { name: "Beta Malt", cat: "Beverages", price: 0 },
+        { name: "Don Simon S/S", cat: "Beverages", price: 0 }, { name: "Don Simon B/S", cat: "Beverages", price: 0 },
+        { name: "Water S/S", cat: "Beverages", price: 0 }, { name: "Water M/S", cat: "Beverages", price: 0 },
+        { name: "Water B/S", cat: "Beverages", price: 0 }, { name: "Tampico S/S", cat: "Beverages", price: 0 },
+        { name: "Tampico M/S", cat: "Beverages", price: 0 }, { name: "Vim Energy", cat: "Beverages", price: 0 },
+        { name: "Storm B/S", cat: "Beverages", price: 0 }, { name: "Storm S/S", cat: "Beverages", price: 0 },
+        { name: "Wheat B/S", cat: "Beverages", price: 0 }, { name: "Wheat S/S", cat: "Beverages", price: 0 },
+        { name: "Blue Jeans", cat: "Beverages", price: 0 }, { name: "Festival Choc", cat: "Beverages", price: 0 },
+        { name: "Ceres Bottle", cat: "Beverages", price: 0 }, { name: "Arizona", cat: "Beverages", price: 0 },
+        { name: "Abest Coffee", cat: "Beverages", price: 0 }, { name: "Champagne", cat: "Beverages", price: 0 },
+        { name: "Scavi & Ray", cat: "Beverages", price: 0 }, { name: "Apple Juice", cat: "Beverages", price: 0 },
+        { name: "Darling", cat: "Alcoholic", price: 0 }, { name: "Panache", cat: "Alcoholic", price: 0 },
+        { name: "Kiss", cat: "Alcoholic", price: 0 }, { name: "Faxe", cat: "Alcoholic", price: 0 },
+        { name: "Stella Artois", cat: "Alcoholic", price: 0 }, { name: "Budweiser", cat: "Alcoholic", price: 0 },
+        { name: "Brutal Fruit", cat: "Alcoholic", price: 0 }, { name: "Hunters", cat: "Alcoholic", price: 0 },
+        { name: "8pm M/S", cat: "Alcoholic", price: 0 }, { name: "8pm S/S", cat: "Alcoholic", price: 0 },
+        { name: "8pm B/S", cat: "Alcoholic", price: 0 }, { name: "Afribull", cat: "Alcoholic", price: 0 },
+        { name: "Red Label", cat: "Alcoholic", price: 0 }, { name: "Black Label", cat: "Alcoholic", price: 0 },
+        { name: "Obuasi Gringo", cat: "Alcoholic", price: 0 }, { name: "Old Admiral S/S", cat: "Alcoholic", price: 0 },
+        { name: "Old Admiral M/S", cat: "Alcoholic", price: 0 }, { name: "Old Admiral B/S", cat: "Alcoholic", price: 0 },
+        { name: "Obuasi Btl", cat: "Alcoholic", price: 0 }, { name: "Strawberry Btl", cat: "Alcoholic", price: 0 },
+        { name: "Charlie Btl", cat: "Alcoholic", price: 0 }, { name: "Jojo", cat: "Alcoholic", price: 0 },
+        { name: "Schnapp Rubber", cat: "Alcoholic", price: 0 }, { name: "Schnapp Kente", cat: "Alcoholic", price: 0 },
+        { name: "Schnapp Local", cat: "Alcoholic", price: 0 }, { name: "Coke B/S", cat: "Alcoholic", price: 0 },
+        { name: "Captain Morgan", cat: "Alcoholic", price: 0 }, { name: "Don Luciano", cat: "Alcoholic", price: 0 },
+        { name: "JP Chenet", cat: "Alcoholic", price: 0 }, { name: "Wine", cat: "Alcoholic", price: 0 },
+        { name: "DeRay Ginger", cat: "Alcoholic", price: 0 }, { name: "DeRay Bottle", cat: "Alcoholic", price: 0 },
+        { name: "Amuzu Bottle", cat: "Alcoholic", price: 0 }, { name: "Lime Bottle", cat: "Alcoholic", price: 0 },
+        { name: "Vody", cat: "Alcoholic", price: 0 }, { name: "Bullet", cat: "Alcoholic", price: 0 },
+        { name: "Smirnoff can", cat: "Alcoholic", price: 0 }, { name: "Club B/S", cat: "Alcoholic", price: 0 },
+        { name: "Club Mini", cat: "Alcoholic", price: 0 }, { name: "Orijin B/S", cat: "Alcoholic", price: 0 },
+        { name: "Orijin mini", cat: "Alcoholic", price: 0 }, { name: "Shandy B/S", cat: "Alcoholic", price: 0 },
+        { name: "Shandy Mini", cat: "Alcoholic", price: 0 }, { name: "Kings Bottle", cat: "Alcoholic", price: 0 },
+        { name: "Eagle Black", cat: "Alcoholic", price: 0 }, { name: "Eagle white", cat: "Alcoholic", price: 0 },
+        { name: "Guinness", cat: "Alcoholic", price: 0 }, { name: "Smirnoff Bottle", cat: "Alcoholic", price: 0 },
+        { name: "Smirnoff Punch", cat: "Alcoholic", price: 0 }, { name: "Gulder", cat: "Alcoholic", price: 0 },
+        { name: "Alomo Btl", cat: "Alcoholic", price: 0 }, { name: "Choice sachets", cat: "Sachets", price: 0 },
+        { name: "Adonko 123", cat: "Sachets", price: 0 }, { name: "Goal sac", cat: "Sachets", price: 0 },
+        { name: "Alomo sac", cat: "Sachets", price: 0 }, { name: "Black Rock", cat: "Sachets", price: 0 },
+        { name: "K20 sac", cat: "Sachets", price: 0 }, { name: "Tonic wine", cat: "Sachets", price: 0 },
+        { name: "Kpoo Keke", cat: "Sachets", price: 0 }, { name: "Herb Afrik", cat: "Sachets", price: 0 },
+        { name: "Striker sac", cat: "Sachets", price: 0 }, { name: "Madingo sac", cat: "Sachets", price: 0 },
+        { name: "Obuasi 442", cat: "Sachets", price: 0 }, { name: "Round 2", cat: "Sachets", price: 0 },
+        { name: "Castle Bridge", cat: "Sachets", price: 0 }, { name: "Sewa sac", cat: "Sachets", price: 0 },
+        { name: "Fantasy", cat: "IceCream", price: 0 }, { name: "Frosty 150ml", cat: "IceCream", price: 0 },
+        { name: "Chicken", cat: "Misc", price: 0 }, { name: "Biscuits", cat: "Misc", price: 0 }
+    ].map((item, index) => ({ ...item, id: index + 1 }));
 
     let salesTotal = 0; let expenses = []; let currentCat = "Beverages";
-
-    function checkPin() {
-        if (document.getElementById('pin-input').value === '1012') {
-            document.getElementById('login-overlay').style.display = 'none';
-            startSync();
-        } else { alert("Access Denied"); }
-    }
 
     function startSync() {
         db.ref('lounge_data').on('value', (s) => {
             const data = s.val();
-            if (data) {
-                inventory = data.inventory || inventory;
-                salesTotal = data.salesTotal || 0;
-                expenses = data.expenses || [];
-            } else { save(); }
+            if (data) { inventory = data.inventory || inventory; salesTotal = data.salesTotal || 0; expenses = data.expenses || []; }
             render();
         });
     }
 
     function render() {
-        // Categories
-        const cats = ["Beverages", "Alcoholic", "Sachets", "IceCream", "Misc"];
-        document.getElementById('cat-tabs-ui').innerHTML = cats.map(c => 
-            `<button onclick="setCat('${c}')" class="cat-tab ${currentCat===c?'active':''}">${c}</button>`
-        ).join('');
-
-        // Grid
-        const grid = document.getElementById('item-grid');
-        grid.innerHTML = inventory.filter(i => i.cat === currentCat).map(i => `
-            <button class="item-btn" onclick="sell(${i.id})">${i.name}<br><span style="color:#888">₵${i.price}</span></button>
-        `).join('');
-
-        // Inventory Table
-        document.getElementById('inventory-body').innerHTML = inventory.map(i => `
-            <tr><td>${i.name}</td><td><input type="number" value="${i.price}" onchange="upd(${i.id}, this.value)"></td></tr>
-        `).join('');
-
-        // Reports
-        const expTotal = expenses.reduce((a, b) => a + parseFloat(b.amount), 0);
+        const cats = [...new Set(inventory.map(i => i.cat))];
+        document.getElementById('cat-tabs-ui').innerHTML = cats.map(c => `<button onclick="setCat('${c}')" class="cat-tab ${currentCat===c?'active':''}">${c}</button>`).join('');
+        document.getElementById('item-grid').innerHTML = inventory.filter(i => i.cat === currentCat).map(i => `<button class="item-btn" onclick="sell(${i.id})">${i.name}<br>₵${i.price}</button>`).join('');
+        document.getElementById('inventory-body').innerHTML = inventory.map(i => `<tr><td>${i.name}</td><td><input type="number" value="${i.price}" onchange="upd(${i.id}, this.value)"></td></tr>`).join('');
         document.getElementById('total-val').innerText = "₵" + salesTotal.toFixed(2);
         document.getElementById('rep-rev').innerText = "₵" + salesTotal.toFixed(2);
-        document.getElementById('rep-exp').innerText = "₵" + expTotal.toFixed(2);
-        document.getElementById('rep-net').innerText = "₵" + (salesTotal - expTotal).toFixed(2);
+        const expT = expenses.reduce((a, b) => a + parseFloat(b.amount), 0);
+        document.getElementById('rep-exp').innerText = "₵" + expT.toFixed(2);
     }
 
     function setCat(c) { currentCat = c; render(); }
-    function sell(id) { 
-        const i = inventory.find(x => x.id === id); 
-        if(i.price <= 0) alert("Set price in Inventory first!");
-        else { salesTotal += parseFloat(i.price); save(); }
-    }
+    function sell(id) { salesTotal += parseFloat(inventory.find(x => x.id === id).price); save(); }
     function upd(id, p) { inventory.find(x => x.id === id).price = parseFloat(p); save(); }
-    function addExp() {
-        const n = document.getElementById('exp-name').value;
-        const a = document.getElementById('exp-amt').value;
-        if(n && a) { expenses.push({name:n, amount:a}); save(); }
-    }
+    function addExp() { const n = document.getElementById('exp-name').value; const a = document.getElementById('exp-amt').value; if(n && a) { expenses.push({name:n, amount:a}); save(); } }
     function save() { db.ref('lounge_data').set({inventory, salesTotal, expenses}); }
-    function showPage(id) {
-        document.querySelectorAll('.page-content').forEach(p => p.classList.remove('active'));
-        document.querySelectorAll('.nav-btn').forEach(b => b.classList.remove('active'));
-        document.getElementById(id).classList.add('active');
-        document.getElementById('btn-' + id.split('-')[0]).classList.add('active');
-    }
+    function showPage(id) { document.querySelectorAll('.page-content').forEach(p => p.style.display='none'); document.getElementById(id).style.display='block'; }
     function resetDay() { if(confirm("Clear day?")) { salesTotal = 0; expenses = []; save(); } }
-</script>
 
+    function exportToExcel() {
+        let reportData = [["Ojoo Amisty Lounge Report"], ["Type", "Name", "Amount"], ["REVENUE", "Total Sales", salesTotal]];
+        expenses.forEach(e => reportData.push(["EXPENSE", e.name, e.amount]));
+        let ws = XLSX.utils.aoa_to_sheet(reportData);
+        let wb = XLSX.utils.book_new();
+        XLSX.utils.book_append_sheet(wb, ws, "DailyReport");
+        XLSX.writeFile(wb, "Ojoo_Lounge_Report.xlsx");
+    }
+</script>
 </body>
 </html>
