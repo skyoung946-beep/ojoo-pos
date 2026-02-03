@@ -1,14 +1,14 @@
 <!DOCTYPE html>
 <html>
 <head>
-    <title>Ojoo Amisty Lounge - Master Control</title>
+    <title>Ojoo Amisty Lounge - Pro POS</title>
     <meta name="viewport" content="width=device-width, initial-scale=1">
     <script src="https://www.gstatic.com/firebasejs/8.10.0/firebase-app.js"></script>
     <script src="https://www.gstatic.com/firebasejs/8.10.0/firebase-database.js"></script>
     <script src="https://cdnjs.cloudflare.com/ajax/libs/xlsx/0.18.5/xlsx.full.min.js"></script>
     
     <style>
-        :root { --orange: #f39c12; --bg: #0d0d0d; }
+        :root { --orange: #f39c12; --red: #e74c3c; }
         body { font-family: 'Segoe UI', sans-serif; background: #050505; color: white; margin: 0; display: flex; height: 100vh; overflow: hidden; }
 
         /* LOGIN */
@@ -16,7 +16,6 @@
         .pin-display { background: #222; padding: 20px; width: 220px; text-align: center; font-size: 30px; margin-bottom: 20px; border-radius: 10px; border: 2px solid var(--orange); color: var(--orange); height: 40px; }
         .pin-grid { display: grid; grid-template-columns: repeat(3, 1fr); gap: 15px; }
         .pin-btn { width: 70px; height: 70px; border-radius: 50%; border: 1px solid #333; background: #111; color: white; font-size: 24px; cursor: pointer; }
-        .pin-btn:active { background: var(--orange); color: black; }
 
         /* SIDEBAR */
         .sidebar { width: 220px; background: #111; border-right: 1px solid #333; display: flex; flex-direction: column; padding: 20px; flex-shrink: 0; }
@@ -24,25 +23,21 @@
         .nav-btn.active { background: var(--orange); color: black; }
         .admin-only { display: none; }
 
-        /* CONTENT */
-        .main-content { flex: 1; display: flex; flex-direction: column; overflow: hidden; }
-        .header { padding: 15px 25px; background: #000; display: flex; justify-content: space-between; align-items: center; border-bottom: 1px solid #222; }
-        #total-val { font-size: 32px; color: var(--orange); font-weight: 900; }
-        
-        .page-content { flex: 1; padding: 20px; overflow-y: auto; display: none; }
-        .page-content.active { display: block; }
+        /* MAIN */
+        .main-content { flex: 1; display: flex; flex-direction: row; overflow: hidden; }
+        .pos-section { flex: 2; display: flex; flex-direction: column; padding: 20px; overflow-y: auto; }
+        .cart-section { width: 300px; background: #111; border-left: 1px solid #333; padding: 20px; display: flex; flex-direction: column; }
 
-        .cat-bar { display: flex; gap: 10px; margin-bottom: 20px; overflow-x: auto; padding-bottom: 5px; }
-        .cat-tab { background: #222; color: white; border: none; padding: 8px 18px; border-radius: 20px; cursor: pointer; font-size: 12px; font-weight: bold; }
-        .cat-tab.active { background: white; color: black; }
-        
-        .grid { display: grid; grid-template-columns: repeat(auto-fill, minmax(115px, 1fr)); gap: 12px; }
-        .item-btn { padding: 10px; font-weight: 800; border-radius: 12px; color: #111; height: 85px; border: none; background: #fff; box-shadow: 0 4px #bdc3c7; cursor: pointer; font-size: 10px; text-transform: uppercase; }
+        /* GRID */
+        .grid { display: grid; grid-template-columns: repeat(auto-fill, minmax(110px, 1fr)); gap: 10px; }
+        .item-btn { padding: 10px; border-radius: 12px; color: #111; height: 95px; border: none; background: #fff; cursor: pointer; font-size: 10px; font-weight: bold; text-align: center; position: relative; }
+        .stock-tag { position: absolute; top: 5px; right: 5px; background: #000; color: #fff; padding: 2px 5px; border-radius: 4px; font-size: 9px; }
+        .out-of-stock { background: #555 !important; color: #888 !important; pointer-events: none; }
 
-        .form-box { background: #111; padding: 15px; border-radius: 10px; margin-bottom: 20px; border: 1px solid #222; }
-        input, select { background: #1a1a1a; color: white; border: 1px solid #333; padding: 10px; border-radius: 5px; margin-right: 10px; margin-bottom: 10px; width: 200px; }
+        /* TABLES */
         table { width: 100%; border-collapse: collapse; }
-        th, td { padding: 12px; border-bottom: 1px solid #222; text-align: left; }
+        th, td { padding: 10px; border-bottom: 1px solid #222; text-align: left; font-size: 13px; }
+        input { background: #1a1a1a; color: white; border: 1px solid #333; padding: 8px; border-radius: 5px; width: 80px; }
     </style>
 </head>
 <body>
@@ -50,103 +45,62 @@
 <div id="login-overlay">
     <h2 style="color:var(--orange)">OJOO AMISTY LOUNGE</h2>
     <div class="pin-display" id="pin-view">****</div>
-    <div class="pin-grid">
-        <button class="pin-btn" onclick="pressPin('1')">1</button>
-        <button class="pin-btn" onclick="pressPin('2')">2</button>
-        <button class="pin-btn" onclick="pressPin('3')">3</button>
-        <button class="pin-btn" onclick="pressPin('4')">4</button>
-        <button class="pin-btn" onclick="pressPin('5')">5</button>
-        <button class="pin-btn" onclick="pressPin('6')">6</button>
-        <button class="pin-btn" onclick="pressPin('7')">7</button>
-        <button class="pin-btn" onclick="pressPin('8')">8</button>
-        <button class="pin-btn" onclick="pressPin('9')">9</button>
-        <button class="pin-btn" style="color:red" onclick="typedPin=''">C</button>
-        <button class="pin-btn" onclick="pressPin('0')">0</button>
-        <button class="pin-btn" style="color:green" onclick="checkPin()">OK</button>
-    </div>
+    <div class="pin-grid" id="numpad"></div>
 </div>
 
 <div class="sidebar">
-    <div style="margin-bottom: 20px; font-size: 12px; color: #555;">USER: <span id="user-ui" style="color:var(--orange)">...</span></div>
+    <div style="margin-bottom: 20px; font-size: 12px; color: #555;">STAFF: <span id="user-ui" style="color:var(--orange)">...</span></div>
     <button onclick="showPage('sales-page')" class="nav-btn active">POS TERMINAL</button>
     <button onclick="showPage('surplus-page')" class="nav-btn">RECORD SURPLUS</button>
     <button onclick="showPage('expenses-page')" class="nav-btn">EXPENSES</button>
-    
     <div id="admin-menu" class="admin-only">
         <hr style="border:0; border-top:1px solid #222; margin:15px 0;">
-        <button onclick="showPage('inventory-page')" class="nav-btn">PRICE MANAGEMENT</button>
-        <button onclick="showPage('add-drink-page')" class="nav-btn">ADD NEW DRINKS</button>
+        <button onclick="showPage('stock-page')" class="nav-btn">STOCK & PRICES</button>
         <button onclick="showPage('staff-page')" class="nav-btn">STAFF MANAGER</button>
-        <button onclick="showPage('reports-page')" class="nav-btn">REPORTS / EXCEL</button>
+        <button onclick="showPage('reports-page')" class="nav-btn">REPORTS</button>
     </div>
 </div>
 
 <div class="main-content">
-    <div class="header">
-        <h3 id="page-title" style="margin:0; color:#444;">Sales Terminal</h3>
-        <div id="total-val">₵***</div>
-    </div>
-
-    <div id="sales-page" class="page-content active">
-        <div class="cat-bar" id="cat-tabs-ui"></div>
-        <div id="item-grid" class="grid"></div>
-    </div>
-
-    <div id="surplus-page" class="page-content">
-        <h3>Record Surplus / Promo Money</h3>
-        <p style="color:#777; font-size: 13px;">Use this when a drink is sold higher than the system price (e.g. Programs).</p>
-        <div class="form-box">
-            <input type="number" id="surplus-amt" placeholder="Extra Amount (₵)">
-            <input type="text" id="surplus-note" placeholder="Reason (e.g. Xmas Promo)">
-            <button onclick="addSurplus()" style="background:#2ecc71; border:none; padding:10px; font-weight:bold; cursor:pointer;">RECORD EXTRA MONEY</button>
+    <div class="pos-section">
+        <div id="sales-page" class="page-content active">
+            <div class="cat-bar" id="cat-tabs-ui" style="margin-bottom:15px; display:flex; gap:5px; overflow-x:auto;"></div>
+            <div id="item-grid" class="grid"></div>
         </div>
-        <table style="width:100%"><tbody id="surplus-body"></tbody></table>
-    </div>
 
-    <div id="add-drink-page" class="page-content">
-        <h3>Add New Drink</h3>
-        <div class="form-box">
-            <input type="text" id="new-item-name" placeholder="Drink Name">
-            <input type="number" id="new-item-price" placeholder="Price (₵)">
-            <select id="new-item-cat">
-                <option value="Beverages">Beverages</option>
-                <option value="Alcoholic">Alcoholic</option>
-                <option value="Sachets">Sachets</option>
-                <option value="IceCream">Ice Cream</option>
-                <option value="Misc">Misc</option>
-            </select>
-            <button onclick="addNewDrink()" style="background:var(--orange); border:none; padding:10px;">ADD DRINK</button>
+        <div id="stock-page" class="page-content">
+            <h3>Inventory & Stock Control</h3>
+            <table>
+                <thead><tr><th>Item</th><th>Price</th><th>Stock</th><th>Action</th></tr></thead>
+                <tbody id="stock-body"></tbody>
+            </table>
+            <button onclick="addNewItemPrompt()" style="margin-top:15px; background:var(--orange); border:none; padding:10px;">+ Add New Drink</button>
         </div>
-    </div>
 
-    <div id="inventory-page" class="page-content">
-        <h3>Prices</h3>
-        <table id="inv-table"><thead><tr><th>Drink</th><th>Price</th><th>Del</th></tr></thead><tbody id="inventory-body"></tbody></table>
-    </div>
-
-    <div id="staff-page" class="page-content">
-        <h3>Staff</h3>
-        <div class="form-box"><input type="text" id="new-staff-name" placeholder="Name"><input type="number" id="new-staff-pin" placeholder="PIN"><button onclick="addStaff()">Add</button></div>
-        <table><tbody id="staff-body"></tbody></table>
-    </div>
-
-    <div id="expenses-page" class="page-content">
-        <h3>Daily Expenses</h3>
-        <div class="form-box"><input type="text" id="exp-name" placeholder="Item"><input type="number" id="exp-amt" placeholder="Amount"><button onclick="addExp()">Save</button></div>
-        <table style="width:100%"><tbody id="exp-body"></tbody></table>
-    </div>
-
-    <div id="reports-page" class="page-content">
-        <h3>Financial Report</h3>
-        <div style="background:#111; padding:20px; border-radius:10px; margin-bottom:20px;">
-            <p>Standard Sales: <span id="rep-rev">₵0.00</span></p>
-            <p>Surplus/Promo Money: <span id="rep-surplus" style="color:#2ecc71">₵0.00</span></p>
-            <p>Expenses: <span id="rep-exp" style="color:red">₵0.00</span></p>
-            <hr>
-            <h2>Grand Total: <span id="rep-grand" style="color:var(--orange)">₵0.00</span></h2>
+        <div id="staff-page" class="page-content">
+            <h3>Staff Manager</h3>
+            <div id="staff-list"></div>
         </div>
-        <button onclick="exportToExcel()" style="background:#2ecc71; color:white; padding:15px; border:none; width:100%; cursor:pointer;">DOWNLOAD EXCEL REPORT</button>
-        <button onclick="resetDay()" style="margin-top:50px; background:none; color:red; border:1px solid red; padding:5px;">RESET SYSTEM FOR NEW DAY</button>
+
+        <div id="reports-page" class="page-content">
+            <h3>Admin Reports</h3>
+            <div id="admin-totals" style="background:#111; padding:20px; border-radius:10px;"></div>
+            <button onclick="exportToExcel()" style="background:#2ecc71; color:white; padding:15px; border:none; width:100%; cursor:pointer; margin-top:10px;">DOWNLOAD EXCEL</button>
+            <button onclick="resetDay()" style="color:red; background:none; border:1px solid red; margin-top:20px; cursor:pointer;">RESET ALL FOR NEW DAY</button>
+        </div>
+        
+        <div id="expenses-page" class="page-content"><h3>Expenses</h3><div id="exp-form"></div><table id="exp-table"></table></div>
+        <div id="surplus-page" class="page-content"><h3>Surplus Money</h3><div id="surp-form"></div><table id="surp-table"></table></div>
+    </div>
+
+    <div class="cart-section">
+        <h3 style="color:var(--orange)">Order Summary</h3>
+        <div id="cart-items" style="flex:1; overflow-y:auto;"></div>
+        <hr style="border:0; border-top:1px solid #333;">
+        <div style="font-size:20px; font-weight:bold; display:flex; justify-content:space-between;">
+            <span>Total:</span><span id="cart-total">₵0.00</span>
+        </div>
+        <button onclick="checkout()" style="background:var(--orange); border:none; padding:15px; font-weight:bold; margin-top:15px; cursor:pointer; border-radius:8px;">CONFIRM SALE</button>
     </div>
 </div>
 
@@ -155,92 +109,133 @@
     firebase.initializeApp(firebaseConfig);
     const db = firebase.database();
 
-    let typedPin = "", currentUser = "", isAdmin = false;
-    let staffList = [{ name: "Master", pin: "1012" }, { name: "Ako", pin: "3026" }, { name: "Essin", pin: "4321" }];
+    let typedPin = "", currentUser = "", isAdmin = false, cart = [];
+    let staffList = [{name:"Master", pin:"1012"}, {name:"Ako", pin:"3026"}, {name:"Essin", pin:"4321"}];
     let inventory = [], salesTotal = 0, expenses = [], surplusEntries = [];
 
-    function pressPin(n) { typedPin += n; document.getElementById('pin-view').innerText = "*".repeat(typedPin.length); }
-    
+    // Initialize Numpad
+    const pad = document.getElementById('numpad');
+    [1,2,3,4,5,6,7,8,9,'C',0,'OK'].forEach(k => {
+        const b = document.createElement('button'); b.className = 'pin-btn'; b.innerText = k;
+        if(k==='C') b.onclick = () => { typedPin = ""; updatePinView(); };
+        else if(k==='OK') b.onclick = checkPin;
+        else b.onclick = () => { typedPin += k; updatePinView(); };
+        pad.appendChild(b);
+    });
+
+    function updatePinView() { document.getElementById('pin-view').innerText = "*".repeat(typedPin.length) || "****"; }
+
     function checkPin() {
         const found = staffList.find(s => s.pin === typedPin);
         if (found) {
             currentUser = found.name; isAdmin = (found.pin === "1012");
             document.getElementById('user-ui').innerText = currentUser;
             document.getElementById('login-overlay').style.display='none';
-            if(isAdmin) document.getElementById('admin-menu').style.display = 'block';
+            if(isAdmin) document.querySelectorAll('.admin-only').forEach(e => e.style.display='block');
             startSync();
-        } else { alert("Wrong PIN"); typedPin = ""; document.getElementById('pin-view').innerText = "****"; }
+        } else { alert("Wrong PIN"); typedPin = ""; updatePinView(); }
     }
 
     function startSync() {
-        db.ref('lounge_data').on('value', (s) => {
+        db.ref('ojoo_data').on('value', (s) => {
             const data = s.val() || {};
             inventory = data.inventory || [];
             salesTotal = data.salesTotal || 0;
             expenses = data.expenses || [];
-            staffList = data.staffList || staffList;
             surplusEntries = data.surplusEntries || [];
+            staffList = data.staffList || staffList;
             render();
         });
     }
 
     function render() {
-        const totalSurplus = surplusEntries.reduce((a, b) => a + parseFloat(b.amount || 0), 0);
-        const expTotal = expenses.reduce((a, b) => a + parseFloat(b.amount || 0), 0);
-        
-        document.getElementById('total-val').innerText = isAdmin ? "₵" + (salesTotal + totalSurplus).toFixed(2) : "₵***";
-        
         const cats = ["ALL", "Beverages", "Alcoholic", "Sachets", "IceCream", "Misc"];
-        const currentCat = window.selectedCat || "ALL";
-        document.getElementById('cat-tabs-ui').innerHTML = cats.map(c => `<button onclick="setCat('${c}')" class="cat-tab ${currentCat===c?'active':''}">${c}</button>`).join('');
+        const curCat = window.selCat || "ALL";
+        
+        // Render Categories
+        document.getElementById('cat-tabs-ui').innerHTML = cats.map(c => `
+            <button onclick="window.selCat='${c}';render()" class="cat-tab ${curCat===c?'active':''}">${c}</button>
+        `).join('');
 
-        const gridItems = currentCat === "ALL" ? inventory : inventory.filter(i => i.cat === currentCat);
-        document.getElementById('item-grid').innerHTML = gridItems.map(i => `<button class="item-btn" onclick="sell(${i.id})">${i.name}<br>₵${(i.price||0).toFixed(2)}</button>`).join('');
+        // Render Grid
+        const filtered = curCat === "ALL" ? inventory : inventory.filter(i => i.cat === curCat);
+        document.getElementById('item-grid').innerHTML = filtered.map(i => `
+            <button class="item-btn ${i.stock <= 0 ? 'out-of-stock' : ''}" onclick="addToCart(${i.id})">
+                <span class="stock-tag">${i.stock}</span>
+                ${i.name}<br>₵${i.price.toFixed(2)}
+            </button>
+        `).join('');
 
+        // Render Cart
+        let cTotal = 0;
+        document.getElementById('cart-items').innerHTML = cart.map((item, idx) => {
+            cTotal += item.price;
+            return `<div style="display:flex; justify-content:space-between; margin-bottom:10px;">
+                <span>${item.name}</span>
+                <span>₵${item.price} <button onclick="removeFromCart(${idx})" style="color:red; background:none; border:none; margin-left:5px;">Undo</button></span>
+            </div>`;
+        }).join('');
+        document.getElementById('cart-total').innerText = "₵" + cTotal.toFixed(2);
+
+        // Admin Reports
         if(isAdmin) {
-            document.getElementById('inventory-body').innerHTML = inventory.map(i => `<tr><td>${i.name}</td><td><input type="number" value="${i.price}" onchange="upd(${i.id}, this.value)"></td><td><button onclick="removeItem(${i.id})">X</button></td></tr>`).join('');
-            document.getElementById('staff-body').innerHTML = staffList.map((s, idx) => `<tr><td>${s.name}</td><td>${s.pin}</td><td><button onclick="removeStaff(${idx})">Del</button></td></tr>`).join('');
-            document.getElementById('rep-rev').innerText = "₵" + salesTotal.toFixed(2);
-            document.getElementById('rep-surplus').innerText = "₵" + totalSurplus.toFixed(2);
-            document.getElementById('rep-exp').innerText = "₵" + expTotal.toFixed(2);
-            document.getElementById('rep-grand').innerText = "₵" + (salesTotal + totalSurplus - expTotal).toFixed(2);
+            const surpTotal = surplusEntries.reduce((a,b)=>a+parseFloat(b.amount),0);
+            const expTotal = expenses.reduce((a,b)=>a+parseFloat(b.amount),0);
+            document.getElementById('admin-totals').innerHTML = `
+                <p>Standard Sales: ₵${salesTotal.toFixed(2)}</p>
+                <p>Surplus: ₵${surpTotal.toFixed(2)}</p>
+                <p>Expenses: ₵${expTotal.toFixed(2)}</p>
+                <h3>Cash In Drawer: ₵${(salesTotal + surpTotal - expTotal).toFixed(2)}</h3>
+            `;
+            document.getElementById('stock-body').innerHTML = inventory.map(i => `
+                <tr>
+                    <td>${i.name}</td>
+                    <td><input type="number" value="${i.price}" onchange="updItem(${i.id}, 'price', this.value)"></td>
+                    <td><input type="number" value="${i.stock}" onchange="updItem(${i.id}, 'stock', this.value)"></td>
+                    <td><button onclick="delItem(${i.id})">X</button></td>
+                </tr>
+            `).join('');
         }
-        document.getElementById('surplus-body').innerHTML = surplusEntries.map(s => `<tr><td>${s.note}</td><td>₵${s.amount}</td></tr>`).join('');
-        document.getElementById('exp-body').innerHTML = expenses.map(e => `<tr><td>${e.name}</td><td>₵${e.amount}</td></tr>`).join('');
     }
 
-    function setCat(c) { window.selectedCat = c; render(); }
-    function sell(id) { salesTotal += parseFloat(inventory.find(x => x.id === id).price || 0); save(); }
-    function upd(id, p) { inventory.find(x => x.id === id).price = parseFloat(p); save(); }
-    
-    function addSurplus() {
-        const amt = document.getElementById('surplus-amt').value;
-        const note = document.getElementById('surplus-note').value;
-        if(amt && note) { surplusEntries.push({amount: parseFloat(amt), note: note}); save(); document.getElementById('surplus-amt').value=''; document.getElementById('surplus-note').value=''; }
+    function addToCart(id) {
+        const item = inventory.find(i => i.id === id);
+        if(item.stock > 0) cart.push({...item});
+        render();
     }
 
-    function addNewDrink() {
-        const name = document.getElementById('new-item-name').value;
-        const price = document.getElementById('new-item-price').value;
-        const cat = document.getElementById('new-item-cat').value;
-        if(name && price) { inventory.push({ id: Date.now(), name, price: parseFloat(price), cat }); save(); alert("Added!"); }
+    function removeFromCart(idx) { cart.splice(idx, 1); render(); }
+
+    function checkout() {
+        if(cart.length === 0) return;
+        cart.forEach(cartItem => {
+            const invItem = inventory.find(i => i.id === cartItem.id);
+            invItem.stock -= 1;
+            salesTotal += invItem.price;
+        });
+        cart = [];
+        save();
+        alert("Sale Confirmed!");
     }
 
-    function addExp() {
-        const n = document.getElementById('exp-name').value, a = document.getElementById('exp-amt').value;
-        if(n && a) { expenses.push({name:n, amount:a}); save(); document.getElementById('exp-name').value=''; document.getElementById('exp-amt').value=''; }
+    function updItem(id, field, val) {
+        const item = inventory.find(i => i.id === id);
+        item[field] = parseFloat(val);
+        save();
     }
 
-    function save() { db.ref('lounge_data').set({inventory, salesTotal, expenses, staffList, surplusEntries}); }
+    function addNewItemPrompt() {
+        const name = prompt("Drink Name:");
+        const price = parseFloat(prompt("Price:"));
+        const cat = prompt("Category (Beverages, Alcoholic, Sachets, IceCream, Misc):");
+        if(name && price && cat) {
+            inventory.push({id: Date.now(), name, price, cat, stock: 0});
+            save();
+        }
+    }
+
+    function save() { db.ref('ojoo_data').set({inventory, salesTotal, expenses, surplusEntries, staffList}); }
     function showPage(id) { document.querySelectorAll('.page-content').forEach(p => p.classList.remove('active')); document.getElementById(id).classList.add('active'); }
-    function resetDay() { if(confirm("Reset Day?")) { salesTotal = 0; expenses = []; surplusEntries = []; save(); } }
-    function exportToExcel() {
-        let data = [["Ojoo Amisty Lounge Report"], ["Type", "Name/Note", "Amount"], ["REVENUE", "Standard Sales", salesTotal]];
-        surplusEntries.forEach(s => data.push(["SURPLUS", s.note, s.amount]));
-        expenses.forEach(e => data.push(["EXPENSE", e.name, e.amount]));
-        let ws = XLSX.utils.aoa_to_sheet(data);
-        let wb = XLSX.utils.book_new(); XLSX.utils.book_append_sheet(wb, ws, "DailyReport"); XLSX.writeFile(wb, "Report.xlsx");
-    }
 </script>
 </body>
 </html>
