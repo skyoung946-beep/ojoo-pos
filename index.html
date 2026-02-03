@@ -1,7 +1,7 @@
 <!DOCTYPE html>
 <html>
 <head>
-    <title>Ojoo Amisty Lounge - Master POS</title>
+    <title>Ojoo Amisty Lounge - Pro POS</title>
     <meta name="viewport" content="width=device-width, initial-scale=1">
     <script src="https://www.gstatic.com/firebasejs/8.10.0/firebase-app.js"></script>
     <script src="https://www.gstatic.com/firebasejs/8.10.0/firebase-database.js"></script>
@@ -18,8 +18,8 @@
         .pin-btn { width: 70px; height: 70px; border-radius: 50%; border: 1px solid #333; background: #111; color: white; font-size: 24px; cursor: pointer; }
 
         /* SIDEBAR */
-        .sidebar { width: 200px; background: #111; border-right: 1px solid #333; display: flex; flex-direction: column; padding: 20px; flex-shrink: 0; }
-        .nav-btn { background: none; border: 1px solid #222; color: #777; padding: 12px; margin-bottom: 8px; border-radius: 8px; cursor: pointer; text-align: left; font-size: 13px; font-weight: bold; border: none; }
+        .sidebar { width: 200px; background: #111; border-right: 1px solid #333; display: flex; flex-direction: column; padding: 20px; flex-shrink: 0; overflow-y: auto; }
+        .nav-btn { background: none; border: 1px solid #222; color: #777; padding: 12px; margin-bottom: 8px; border-radius: 8px; cursor: pointer; text-align: left; font-size: 13px; font-weight: bold; width: 100%; }
         .nav-btn.active { background: var(--orange); color: black; }
         .admin-only { display: none; }
 
@@ -30,14 +30,13 @@
 
         /* GRID */
         .grid { display: grid; grid-template-columns: repeat(auto-fill, minmax(110px, 1fr)); gap: 10px; }
-        .item-btn { padding: 10px; border-radius: 12px; color: #111; height: 95px; border: none; background: #fff; cursor: pointer; font-size: 10px; font-weight: bold; text-align: center; position: relative; box-shadow: 0 4px #999; }
-        .item-btn:active { transform: translateY(2px); box-shadow: 0 1px #999; }
+        .item-btn { padding: 10px; border-radius: 12px; color: #111; height: 95px; border: none; background: #fff; cursor: pointer; font-size: 10px; font-weight: bold; text-align: center; position: relative; }
         .stock-tag { position: absolute; top: 5px; right: 5px; background: #000; color: #fff; padding: 2px 5px; border-radius: 4px; font-size: 9px; }
 
-        /* TABLES */
+        .form-box { background: #111; padding: 15px; border-radius: 10px; border: 1px solid #333; margin-bottom: 20px; }
+        input, select { background: #1a1a1a; color: white; border: 1px solid #333; padding: 10px; border-radius: 5px; margin-bottom: 10px; width: 90%; }
         table { width: 100%; border-collapse: collapse; }
-        th, td { padding: 10px; border-bottom: 1px solid #222; text-align: left; font-size: 13px; }
-        input { background: #1a1a1a; color: white; border: 1px solid #333; padding: 8px; border-radius: 5px; width: 60px; }
+        th, td { padding: 10px; border-bottom: 1px solid #222; text-align: left; }
         
         .page-content { display: none; }
         .page-content.active { display: block; }
@@ -56,9 +55,12 @@
     <button onclick="showPage('sales-page')" class="nav-btn active">POS TERMINAL</button>
     <button onclick="showPage('surplus-page')" class="nav-btn">RECORD SURPLUS</button>
     <button onclick="showPage('expenses-page')" class="nav-btn">EXPENSES</button>
+    
     <div id="admin-menu" class="admin-only">
         <hr style="border:0; border-top:1px solid #222; margin:15px 0;">
         <button onclick="showPage('stock-page')" class="nav-btn">STOCK & PRICES</button>
+        <button onclick="showPage('add-drink-page')" class="nav-btn">ADD NEW DRINK</button>
+        <button onclick="showPage('staff-page')" class="nav-btn">STAFF MANAGER</button>
         <button onclick="showPage('reports-page')" class="nav-btn">REPORTS</button>
     </div>
 </div>
@@ -66,38 +68,63 @@
 <div class="main-content">
     <div class="pos-section">
         <div id="sales-page" class="page-content active">
-            <div id="cat-tabs-ui" style="margin-bottom:15px; display:flex; gap:5px; overflow-x:auto; padding-bottom:5px;"></div>
+            <div id="cat-tabs-ui" style="margin-bottom:15px; display:flex; gap:5px; overflow-x:auto;"></div>
             <div id="item-grid" class="grid"></div>
         </div>
 
         <div id="stock-page" class="page-content">
-            <h3>Inventory Management</h3>
-            <button onclick="forceLoadItems()" style="background:#27ae60; color:white; padding:15px; border:none; border-radius:10px; cursor:pointer; font-weight:bold; margin-bottom:20px; width:100%;">🛠️ LOAD ALL 130 DRINKS INTO DATABASE</button>
+            <h3>Update Prices & Stock</h3>
             <table>
-                <thead><tr><th>Item</th><th>Price (₵)</th><th>In Stock</th></tr></thead>
+                <thead><tr><th>Drink Name</th><th>Price (₵)</th><th>Stock</th><th>Action</th></tr></thead>
                 <tbody id="stock-body"></tbody>
             </table>
         </div>
 
+        <div id="add-drink-page" class="page-content">
+            <h3>Add New Drink</h3>
+            <div class="form-box">
+                <input type="text" id="new-item-name" placeholder="Name (e.g. Heinken)">
+                <input type="number" id="new-item-price" placeholder="Price">
+                <select id="new-item-cat">
+                    <option value="Beverages">Beverages</option>
+                    <option value="Alcoholic">Alcoholic</option>
+                    <option value="Sachets">Sachets</option>
+                    <option value="IceCream">Ice Cream</option>
+                    <option value="Misc">Misc</option>
+                </select>
+                <button onclick="addNewDrink()" style="background:var(--orange); border:none; padding:12px; width:100%; font-weight:bold; cursor:pointer;">ADD TO SYSTEM</button>
+            </div>
+        </div>
+
+        <div id="staff-page" class="page-content">
+            <h3>Staff List</h3>
+            <div class="form-box">
+                <input type="text" id="s-name" placeholder="Staff Name">
+                <input type="number" id="s-pin" placeholder="PIN Code">
+                <button onclick="addStaff()" style="background:var(--orange); border:none; padding:10px; width:100%;">Add New Staff Member</button>
+            </div>
+            <table><tbody id="staff-body"></tbody></table>
+        </div>
+
         <div id="reports-page" class="page-content">
-            <h3>Admin Reports</h3>
+            <h3>Admin Financials</h3>
             <div id="admin-totals" style="background:#111; padding:20px; border-radius:10px; border:1px solid #333;"></div>
             <button onclick="exportToExcel()" style="background:#2ecc71; color:white; padding:15px; border:none; width:100%; cursor:pointer; margin-top:10px; font-weight:bold;">DOWNLOAD EXCEL</button>
-            <button onclick="resetDay()" style="color:red; background:none; border:1px solid red; margin-top:20px; cursor:pointer; padding:5px;">RESET SYSTEM FOR NEW DAY</button>
+            <button onclick="resetDay()" style="color:red; background:none; border:1px solid red; margin-top:20px; padding:8px; cursor:pointer;">RESET ALL</button>
         </div>
 
         <div id="expenses-page" class="page-content">
-            <h3>Record Expense</h3>
-            <input type="text" id="exp-n" placeholder="Reason" style="width:150px"> 
-            <input type="number" id="exp-a" placeholder="Amt">
-            <button onclick="addExp()" style="background:var(--orange); border:none; padding:8px 15px; cursor:pointer;">Save</button>
+            <h3>Daily Expenses</h3>
+            <input type="text" id="exp-n" placeholder="Reason"> <input type="number" id="exp-a" placeholder="Amt">
+            <button onclick="addExp()" style="background:var(--orange); border:none; padding:10px; cursor:pointer;">Save</button>
+            <table style="margin-top:20px;"><tbody id="exp-history"></tbody></table>
         </div>
 
         <div id="surplus-page" class="page-content">
-            <h3>Record Surplus</h3>
-            <input type="text" id="sur-n" placeholder="Reason" style="width:150px"> 
-            <input type="number" id="sur-a" placeholder="Amt">
-            <button onclick="addSurplus()" style="background:#2ecc71; border:none; padding:8px 15px; cursor:pointer;">Save</button>
+            <h3>Surplus/Promo</h3>
+            <input type="text" id="sur-n" placeholder="Reason"> <input type="number" id="sur-a" placeholder="Amt">
+            <button onclick="addSurplus()" style="background:#2ecc71; border:none; padding:10px; cursor:pointer;">Save</button>
+            <table style="margin-top:20px;"><tbody id="sur-history"></tbody></table>
         </div>
     </div>
 
@@ -119,10 +146,9 @@
 
     let typedPin = "", currentUser = "", isAdmin = false, cart = [];
     let staffList = [{name:"Master", pin:"1012"}, {name:"Ako", pin:"3026"}, {name:"Essin", pin:"4321"}];
-    let inventory = []; 
-    let salesTotal = 0, expenses = [], surplusEntries = [];
+    let inventory = [], salesTotal = 0, expenses = [], surplusEntries = [];
 
-    // Numpad Logic
+    // Numpad Setup
     const pad = document.getElementById('numpad');
     [1,2,3,4,5,6,7,8,9,'C',0,'OK'].forEach(k => {
         const b = document.createElement('button'); b.className = 'pin-btn'; b.innerText = k;
@@ -139,7 +165,7 @@
             currentUser = found.name; isAdmin = (found.pin === "1012");
             document.getElementById('user-ui').innerText = currentUser;
             document.getElementById('login-overlay').style.display='none';
-            if(isAdmin) document.querySelectorAll('.admin-only').forEach(e => e.style.display='block');
+            if(isAdmin) document.getElementById('admin-menu').style.display='block';
             startSync();
         } else { alert("Wrong PIN"); typedPin = ""; updatePinView(); }
     }
@@ -151,6 +177,7 @@
             salesTotal = data.salesTotal || 0;
             expenses = data.expenses || [];
             surplusEntries = data.surplusEntries || [];
+            staffList = data.staffList || staffList;
             render();
         });
     }
@@ -158,71 +185,43 @@
     function render() {
         const cats = ["ALL", "Beverages", "Alcoholic", "Sachets", "IceCream", "Misc"];
         const curCat = window.selCat || "ALL";
-        
-        document.getElementById('cat-tabs-ui').innerHTML = cats.map(c => 
-            `<button onclick="window.selCat='${c}';render()" class="cat-tab ${curCat===c?'active':''}" style="background:#222; color:white; border:none; padding:8px 15px; border-radius:20px; cursor:pointer; font-size:11px;">${c}</button>`
-        ).join('');
+        document.getElementById('cat-tabs-ui').innerHTML = cats.map(c => `<button onclick="window.selCat='${c}';render()" class="nav-btn ${curCat===c?'active':''}" style="width:auto; padding:8px 15px;">${c}</button>`).join('');
 
         const filtered = curCat === "ALL" ? inventory : inventory.filter(i => i.cat === curCat);
-        document.getElementById('item-grid').innerHTML = filtered.map(i => `
-            <button class="item-btn" onclick="addToCart(${i.id})">
-                <span class="stock-tag">${i.stock}</span>
-                ${i.name}<br>₵${(i.price || 0).toFixed(2)}
-            </button>
-        `).join('');
+        document.getElementById('item-grid').innerHTML = filtered.map(i => `<button class="item-btn" onclick="addToCart(${i.id})"><span class="stock-tag">${i.stock}</span>${i.name}<br>₵${(i.price || 0).toFixed(2)}</button>`).join('');
 
         let cTotal = 0;
         document.getElementById('cart-items').innerHTML = cart.map((item, idx) => {
             cTotal += item.price;
-            return `<div style="display:flex; justify-content:space-between; padding:5px 0;">
-                <span>${item.name}</span>
-                <span>₵${item.price.toFixed(2)} <button onclick="removeFromCart(${idx})" style="color:red; background:none; border:none; cursor:pointer;">Undo</button></span>
-            </div>`;
+            return `<div style="display:flex; justify-content:space-between; padding:5px 0;"><span>${item.name}</span><span>₵${item.price.toFixed(2)} <button onclick="removeFromCart(${idx})" style="color:red; background:none; border:none; cursor:pointer;">Undo</button></span></div>`;
         }).join('');
         document.getElementById('cart-total').innerText = "₵" + cTotal.toFixed(2);
 
         if(isAdmin) {
-            document.getElementById('stock-body').innerHTML = inventory.map(i => `
-                <tr><td>${i.name}</td><td><input type="number" value="${i.price}" onchange="updItem(${i.id},'price',this.value)"></td><td><input type="number" value="${i.stock}" onchange="updItem(${i.id},'stock',this.value)"></td></tr>
-            `).join('');
+            document.getElementById('stock-body').innerHTML = inventory.map(i => `<tr><td>${i.name}</td><td><input type="number" value="${i.price}" onchange="updItem(${i.id},'price',this.value)"></td><td><input type="number" value="${i.stock}" onchange="updItem(${i.id},'stock',this.value)"></td><td><button onclick="delItem(${i.id})" style="color:red; background:none; border:none;">X</button></td></tr>`).join('');
+            document.getElementById('staff-body').innerHTML = staffList.map((s, idx) => `<tr><td>${s.name}</td><td>${s.pin}</td><td><button onclick="removeStaff(${idx})" style="color:red; background:none; border:none;">Del</button></td></tr>`).join('');
             const surTotal = surplusEntries.reduce((a,b)=>a+parseFloat(b.amount),0);
             const expTotal = expenses.reduce((a,b)=>a+parseFloat(b.amount),0);
-            document.getElementById('admin-totals').innerHTML = `<p>Sales: ₵${salesTotal.toFixed(2)}</p><p>Surplus: ₵${surTotal.toFixed(2)}</p><p>Expenses: ₵${expTotal.toFixed(2)}</p><h3>Drawer: ₵${(salesTotal+surTotal-expTotal).toFixed(2)}</h3>`;
+            document.getElementById('admin-totals').innerHTML = `<p>Sales: ₵${salesTotal.toFixed(2)}</p><p>Surplus: ₵${surTotal.toFixed(2)}</p><p>Expenses: ₵${expTotal.toFixed(2)}</p><h3>Cash In Drawer: ₵${(salesTotal+surTotal-expTotal).toFixed(2)}</h3>`;
         }
+        document.getElementById('exp-history').innerHTML = expenses.map(e => `<tr><td>${e.name}</td><td>₵${e.amount}</td></tr>`).join('');
+        document.getElementById('sur-history').innerHTML = surplusEntries.map(s => `<tr><td>${s.note}</td><td>₵${s.amount}</td></tr>`).join('');
     }
 
     function addToCart(id) { cart.push({...inventory.find(i => i.id === id)}); render(); }
     function removeFromCart(idx) { cart.splice(idx, 1); render(); }
-
-    function checkout() {
-        if(cart.length === 0) return;
-        cart.forEach(cItem => {
-            const invI = inventory.find(i => i.id === cItem.id);
-            invI.stock -= 1;
-            salesTotal += invI.price;
-        });
-        cart = []; save(); alert("Sale Confirmed!");
-    }
-
+    function checkout() { if(cart.length === 0) return; cart.forEach(c => { const i = inventory.find(x => x.id === c.id); i.stock -= 1; salesTotal += i.price; }); cart = []; save(); alert("Success!"); }
     function updItem(id, f, v) { inventory.find(i => i.id === id)[f] = parseFloat(v); save(); }
+    function addNewDrink() { const n = document.getElementById('new-item-name').value, p = document.getElementById('new-item-price').value, c = document.getElementById('new-item-cat').value; if(n&&p){ inventory.push({id: Date.now(), name: n, price: parseFloat(p), cat: c, stock: 100}); save(); alert("Added!"); }}
+    function delItem(id) { if(confirm("Delete Drink?")) { inventory = inventory.filter(i => i.id !== id); save(); }}
+    function addStaff() { const n = document.getElementById('s-name').value, p = document.getElementById('s-pin').value; if(n&&p){ staffList.push({name:n, pin:p}); save(); }}
+    function removeStaff(idx) { if(confirm("Delete Staff?")) { staffList.splice(idx, 1); save(); }}
     function addExp() { const n=document.getElementById('exp-n').value, a=document.getElementById('exp-a').value; if(n&&a){expenses.push({name:n, amount:a}); save();}}
     function addSurplus() { const n=document.getElementById('sur-n').value, a=document.getElementById('sur-a').value; if(n&&a){surplusEntries.push({note:n, amount:a}); save();}}
-    function save() { db.ref('ojoo_final').set({inventory, salesTotal, expenses, surplusEntries}); }
-    function showPage(p) { document.querySelectorAll('.page-content').forEach(c => c.classList.remove('active')); document.getElementById(p).classList.add('active'); }
-    function resetDay() { if(confirm("Reset Day?")){ salesTotal=0; expenses=[]; surplusEntries=[]; save(); }}
-
-    function forceLoadItems() {
-        const fullList = [
-            {name: "Fan max", cat: "Beverages"}, {name: "Bel ice", cat: "Beverages"}, {name: "Chin Chin", cat: "Beverages"}, {name: "Wellman", cat: "Beverages"}, {name: "Vitamilk", cat: "Beverages"}, {name: "Coke Bottle", cat: "Beverages"}, {name: "Fanta Bottle", cat: "Beverages"}, {name: "Malt Bottle", cat: "Beverages"}, {name: "Sprite Bottle", cat: "Beverages"}, {name: "Malt Plastic", cat: "Beverages"}, {name: "Frutelli", cat: "Beverages"}, {name: "Ceres", cat: "Beverages"}, {name: "Hollandia S/S", cat: "Beverages"}, {name: "Hollandia B/S", cat: "Beverages"}, {name: "Can Fanta", cat: "Beverages"}, {name: "Can Coke", cat: "Beverages"}, {name: "Pukka Drink", cat: "Beverages"}, {name: "Pukka Extra", cat: "Beverages"}, {name: "5 Star", cat: "Beverages"}, {name: "Lucozade bottle", cat: "Beverages"}, {name: "Lucozade can", cat: "Beverages"}, {name: "Beta Malt", cat: "Beverages"}, {name: "Don Simon S/S", cat: "Beverages"}, {name: "Don Simon B/S", cat: "Beverages"}, {name: "Water S/S", cat: "Beverages"}, {name: "Water M/S", cat: "Beverages"}, {name: "Water B/S", cat: "Beverages"}, {name: "Tampico S/S", cat: "Beverages"}, {name: "Tampico M/S", cat: "Beverages"}, {name: "Vim Energy", cat: "Beverages"}, {name: "Storm B/S", cat: "Beverages"}, {name: "Storm S/S", cat: "Beverages"}, {name: "Wheat B/S", cat: "Beverages"}, {name: "Wheat S/S", cat: "Beverages"}, {name: "Blue Jeans", cat: "Beverages"}, {name: "Festival Choc", cat: "Beverages"}, {name: "Ceres Bottle", cat: "Beverages"}, {name: "Arizona", cat: "Beverages"}, {name: "Abest Coffee", cat: "Beverages"}, {name: "Champagne", cat: "Beverages"}, {name: "Scavi & Ray", cat: "Beverages"}, {name: "Apple Juice", cat: "Beverages"},
-            {name: "Darling", cat: "Alcoholic"}, {name: "Panache", cat: "Alcoholic"}, {name: "Kiss", cat: "Alcoholic"}, {name: "Faxe", cat: "Alcoholic"}, {name: "Stella Artois", cat: "Alcoholic"}, {name: "Budweiser", cat: "Alcoholic"}, {name: "Brutal Fruit", cat: "Alcoholic"}, {name: "Hunters", cat: "Alcoholic"}, {name: "8pm M/S", cat: "Alcoholic"}, {name: "8pm S/S", cat: "Alcoholic"}, {name: "8pm B/S", cat: "Alcoholic"}, {name: "Afribull", cat: "Alcoholic"}, {name: "Red Label", cat: "Alcoholic"}, {name: "Black Label", cat: "Alcoholic"}, {name: "Obuasi Gringo", cat: "Alcoholic"}, {name: "Old Admiral S/S", cat: "Alcoholic"}, {name: "Old Admiral M/S", cat: "Alcoholic"}, {name: "Old Admiral B/S", cat: "Alcoholic"}, {name: "Obuasi Btl", cat: "Alcoholic"}, {name: "Strawberry Btl", cat: "Alcoholic"}, {name: "Charlie Btl", cat: "Alcoholic"}, {name: "Jojo", cat: "Alcoholic"}, {name: "Schnapp Rubber", cat: "Alcoholic"}, {name: "Schnapp Kente", cat: "Alcoholic"}, {name: "Schnapp Local", cat: "Alcoholic"}, {name: "Coke B/S", cat: "Alcoholic"}, {name: "Captain Morgan", cat: "Alcoholic"}, {name: "Don Luciano", cat: "Alcoholic"}, {name: "JP Chenet", cat: "Alcoholic"}, {name: "Wine", cat: "Alcoholic"}, {name: "DeRay Ginger", cat: "Alcoholic"}, {name: "DeRay Bottle", cat: "Alcoholic"}, {name: "Amuzu Bottle", cat: "Alcoholic"}, {name: "Lime Bottle", cat: "Alcoholic"}, {name: "Vody", cat: "Alcoholic"}, {name: "Bullet", cat: "Alcoholic"}, {name: "Smirnoff can", cat: "Alcoholic"}, {name: "Club B/S", cat: "Alcoholic"}, {name: "Club Mini", cat: "Alcoholic"}, {name: "Orijin B/S", cat: "Alcoholic"}, {name: "Orijin mini", cat: "Alcoholic"}, {name: "Shandy B/S", cat: "Alcoholic"}, {name: "Shandy Mini", cat: "Alcoholic"}, {name: "Kings Bottle", cat: "Alcoholic"}, {name: "Eagle Black", cat: "Alcoholic"}, {name: "Eagle white", cat: "Alcoholic"}, {name: "Guinness", cat: "Alcoholic"}, {name: "Smirnoff Bottle", cat: "Alcoholic"}, {name: "Smirnoff Punch", cat: "Alcoholic"}, {name: "Gulder", cat: "Alcoholic"}, {name: "Alomo Btl", cat: "Alcoholic"},
-            {name: "Choice sachets", cat: "Sachets"}, {name: "Adonko 123", cat: "Sachets"}, {name: "Goal sac", cat: "Sachets"}, {name: "Alomo sac", cat: "Sachets"}, {name: "Black Rock", cat: "Sachets"}, {name: "K20 sac", cat: "Sachets"}, {name: "Tonic wine", cat: "Sachets"}, {name: "Kpoo Keke", cat: "Sachets"}, {name: "Herb Afrik", cat: "Sachets"}, {name: "Striker sac", cat: "Sachets"}, {name: "Madingo sac", cat: "Sachets"}, {name: "Obuasi 442", cat: "Sachets"}, {name: "Round 2", cat: "Sachets"}, {name: "Castle Bridge", cat: "Sachets"}, {name: "Sewa sac", cat: "Sachets"},
-            {name: "Fantasy", cat: "IceCream"}, {name: "Frosty 150ml", cat: "IceCream"}, {name: "Chicken", cat: "Misc"}, {name: "Biscuits", cat: "Misc"}
-        ].map((item, idx) => ({ ...item, id: idx + 1, price: 0, stock: 100 }));
-        
-        inventory = fullList;
-        save();
-        alert("SUCCESS! 130 drinks have been added. You can now set prices.");
-    }
+    function save() { db.ref('ojoo_final').set({inventory, salesTotal, expenses, surplusEntries, staffList}); }
+    function showPage(p) { document.querySelectorAll('.page-content').forEach(c => c.classList.remove('active')); document.getElementById(p).classList.add('active'); document.querySelectorAll('.nav-btn').forEach(b => b.classList.remove('active')); event.target.classList.add('active'); }
+    function resetDay() { if(confirm("Reset?")){ salesTotal=0; expenses=[]; surplusEntries=[]; save(); }}
+    function exportToExcel() { let data = [["Ojoo Report"],["Sales", salesTotal],["Expenses", expenses.reduce((a,b)=>a+parseFloat(b.amount),0)]]; let ws = XLSX.utils.aoa_to_sheet(data); let wb = XLSX.utils.book_new(); XLSX.utils.book_append_sheet(wb, ws, "Report"); XLSX.writeFile(wb, "Ojoo_Report.xlsx"); }
 </script>
 </body>
 </html>
