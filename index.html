@@ -66,9 +66,11 @@
 
     <script>
         // --- 1. CONFIGURATION ---
-        const firebaseConfig = {
-            databaseURL: "https://ojoo-lounge-default-rtdb.firebaseio.com"
-        };
+      const firebaseConfig = {
+    apiKey: "AIza...", // You can find this in Firebase Project Settings
+    projectId: "ojoo-lounge", 
+    databaseURL: "https://ojoo-lounge-default-rtdb.firebaseio.com"
+};
         firebase.initializeApp(firebaseConfig);
         const db = firebase.database();
 
@@ -156,3 +158,4 @@
     </script>
 </body>
 </html>
+
