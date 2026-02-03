@@ -1,7 +1,7 @@
 <!DOCTYPE html>
 <html>
 <head>
-    <title>Ojoo Amisty Lounge - Pro POS</title>
+    <title>Ojoo Amisty Lounge - Master POS</title>
     <meta name="viewport" content="width=device-width, initial-scale=1">
     <script src="https://www.gstatic.com/firebasejs/8.10.0/firebase-app.js"></script>
     <script src="https://www.gstatic.com/firebasejs/8.10.0/firebase-database.js"></script>
@@ -72,6 +72,7 @@
 
         <div id="stock-page" class="page-content">
             <h3>Inventory Management</h3>
+            <button onclick="forceLoadItems()" style="background:#27ae60; color:white; padding:15px; border:none; border-radius:10px; cursor:pointer; font-weight:bold; margin-bottom:20px; width:100%;">🛠️ LOAD ALL 130 DRINKS INTO DATABASE</button>
             <table>
                 <thead><tr><th>Item</th><th>Price (₵)</th><th>In Stock</th></tr></thead>
                 <tbody id="stock-body"></tbody>
@@ -121,7 +122,7 @@
     let inventory = []; 
     let salesTotal = 0, expenses = [], surplusEntries = [];
 
-    // Numpad Setup
+    // Numpad Logic
     const pad = document.getElementById('numpad');
     [1,2,3,4,5,6,7,8,9,'C',0,'OK'].forEach(k => {
         const b = document.createElement('button'); b.className = 'pin-btn'; b.innerText = k;
@@ -143,17 +144,10 @@
         } else { alert("Wrong PIN"); typedPin = ""; updatePinView(); }
     }
 
-    const defaultItems = [
-        { name: "Fan max", cat: "Beverages", price: 0, stock: 99 }, { name: "Bel ice", cat: "Beverages", price: 0, stock: 99 },
-        { name: "Coke Bottle", cat: "Beverages", price: 0, stock: 99 }, { name: "Guinness", cat: "Alcoholic", price: 0, stock: 99 },
-        { name: "Club B/S", cat: "Alcoholic", price: 0, stock: 99 }, { name: "Vody", cat: "Alcoholic", price: 0, stock: 99 }
-        // ... (The rest of your 130 items are automatically handled by the database once added)
-    ];
-
     function startSync() {
-        db.ref('ojoo_v3').on('value', (s) => {
+        db.ref('ojoo_final').on('value', (s) => {
             const data = s.val() || {};
-            inventory = data.inventory || defaultItems.map((item, idx) => ({ ...item, id: idx + 1 }));
+            inventory = data.inventory || [];
             salesTotal = data.salesTotal || 0;
             expenses = data.expenses || [];
             surplusEntries = data.surplusEntries || [];
@@ -191,15 +185,9 @@
             document.getElementById('stock-body').innerHTML = inventory.map(i => `
                 <tr><td>${i.name}</td><td><input type="number" value="${i.price}" onchange="updItem(${i.id},'price',this.value)"></td><td><input type="number" value="${i.stock}" onchange="updItem(${i.id},'stock',this.value)"></td></tr>
             `).join('');
-            
             const surTotal = surplusEntries.reduce((a,b)=>a+parseFloat(b.amount),0);
             const expTotal = expenses.reduce((a,b)=>a+parseFloat(b.amount),0);
-            document.getElementById('admin-totals').innerHTML = `
-                <p>Standard Sales: ₵${salesTotal.toFixed(2)}</p>
-                <p>Surplus: ₵${surTotal.toFixed(2)}</p>
-                <p>Expenses: ₵${expTotal.toFixed(2)}</p>
-                <h3 style="color:var(--orange)">In Drawer: ₵${(salesTotal + surTotal - expTotal).toFixed(2)}</h3>
-            `;
+            document.getElementById('admin-totals').innerHTML = `<p>Sales: ₵${salesTotal.toFixed(2)}</p><p>Surplus: ₵${surTotal.toFixed(2)}</p><p>Expenses: ₵${expTotal.toFixed(2)}</p><h3>Drawer: ₵${(salesTotal+surTotal-expTotal).toFixed(2)}</h3>`;
         }
     }
 
@@ -213,15 +201,28 @@
             invI.stock -= 1;
             salesTotal += invI.price;
         });
-        cart = []; save(); alert("Sale Done!");
+        cart = []; save(); alert("Sale Confirmed!");
     }
 
     function updItem(id, f, v) { inventory.find(i => i.id === id)[f] = parseFloat(v); save(); }
     function addExp() { const n=document.getElementById('exp-n').value, a=document.getElementById('exp-a').value; if(n&&a){expenses.push({name:n, amount:a}); save();}}
     function addSurplus() { const n=document.getElementById('sur-n').value, a=document.getElementById('sur-a').value; if(n&&a){surplusEntries.push({note:n, amount:a}); save();}}
-    function save() { db.ref('ojoo_v3').set({inventory, salesTotal, expenses, surplusEntries}); }
+    function save() { db.ref('ojoo_final').set({inventory, salesTotal, expenses, surplusEntries}); }
     function showPage(p) { document.querySelectorAll('.page-content').forEach(c => c.classList.remove('active')); document.getElementById(p).classList.add('active'); }
     function resetDay() { if(confirm("Reset Day?")){ salesTotal=0; expenses=[]; surplusEntries=[]; save(); }}
+
+    function forceLoadItems() {
+        const fullList = [
+            {name: "Fan max", cat: "Beverages"}, {name: "Bel ice", cat: "Beverages"}, {name: "Chin Chin", cat: "Beverages"}, {name: "Wellman", cat: "Beverages"}, {name: "Vitamilk", cat: "Beverages"}, {name: "Coke Bottle", cat: "Beverages"}, {name: "Fanta Bottle", cat: "Beverages"}, {name: "Malt Bottle", cat: "Beverages"}, {name: "Sprite Bottle", cat: "Beverages"}, {name: "Malt Plastic", cat: "Beverages"}, {name: "Frutelli", cat: "Beverages"}, {name: "Ceres", cat: "Beverages"}, {name: "Hollandia S/S", cat: "Beverages"}, {name: "Hollandia B/S", cat: "Beverages"}, {name: "Can Fanta", cat: "Beverages"}, {name: "Can Coke", cat: "Beverages"}, {name: "Pukka Drink", cat: "Beverages"}, {name: "Pukka Extra", cat: "Beverages"}, {name: "5 Star", cat: "Beverages"}, {name: "Lucozade bottle", cat: "Beverages"}, {name: "Lucozade can", cat: "Beverages"}, {name: "Beta Malt", cat: "Beverages"}, {name: "Don Simon S/S", cat: "Beverages"}, {name: "Don Simon B/S", cat: "Beverages"}, {name: "Water S/S", cat: "Beverages"}, {name: "Water M/S", cat: "Beverages"}, {name: "Water B/S", cat: "Beverages"}, {name: "Tampico S/S", cat: "Beverages"}, {name: "Tampico M/S", cat: "Beverages"}, {name: "Vim Energy", cat: "Beverages"}, {name: "Storm B/S", cat: "Beverages"}, {name: "Storm S/S", cat: "Beverages"}, {name: "Wheat B/S", cat: "Beverages"}, {name: "Wheat S/S", cat: "Beverages"}, {name: "Blue Jeans", cat: "Beverages"}, {name: "Festival Choc", cat: "Beverages"}, {name: "Ceres Bottle", cat: "Beverages"}, {name: "Arizona", cat: "Beverages"}, {name: "Abest Coffee", cat: "Beverages"}, {name: "Champagne", cat: "Beverages"}, {name: "Scavi & Ray", cat: "Beverages"}, {name: "Apple Juice", cat: "Beverages"},
+            {name: "Darling", cat: "Alcoholic"}, {name: "Panache", cat: "Alcoholic"}, {name: "Kiss", cat: "Alcoholic"}, {name: "Faxe", cat: "Alcoholic"}, {name: "Stella Artois", cat: "Alcoholic"}, {name: "Budweiser", cat: "Alcoholic"}, {name: "Brutal Fruit", cat: "Alcoholic"}, {name: "Hunters", cat: "Alcoholic"}, {name: "8pm M/S", cat: "Alcoholic"}, {name: "8pm S/S", cat: "Alcoholic"}, {name: "8pm B/S", cat: "Alcoholic"}, {name: "Afribull", cat: "Alcoholic"}, {name: "Red Label", cat: "Alcoholic"}, {name: "Black Label", cat: "Alcoholic"}, {name: "Obuasi Gringo", cat: "Alcoholic"}, {name: "Old Admiral S/S", cat: "Alcoholic"}, {name: "Old Admiral M/S", cat: "Alcoholic"}, {name: "Old Admiral B/S", cat: "Alcoholic"}, {name: "Obuasi Btl", cat: "Alcoholic"}, {name: "Strawberry Btl", cat: "Alcoholic"}, {name: "Charlie Btl", cat: "Alcoholic"}, {name: "Jojo", cat: "Alcoholic"}, {name: "Schnapp Rubber", cat: "Alcoholic"}, {name: "Schnapp Kente", cat: "Alcoholic"}, {name: "Schnapp Local", cat: "Alcoholic"}, {name: "Coke B/S", cat: "Alcoholic"}, {name: "Captain Morgan", cat: "Alcoholic"}, {name: "Don Luciano", cat: "Alcoholic"}, {name: "JP Chenet", cat: "Alcoholic"}, {name: "Wine", cat: "Alcoholic"}, {name: "DeRay Ginger", cat: "Alcoholic"}, {name: "DeRay Bottle", cat: "Alcoholic"}, {name: "Amuzu Bottle", cat: "Alcoholic"}, {name: "Lime Bottle", cat: "Alcoholic"}, {name: "Vody", cat: "Alcoholic"}, {name: "Bullet", cat: "Alcoholic"}, {name: "Smirnoff can", cat: "Alcoholic"}, {name: "Club B/S", cat: "Alcoholic"}, {name: "Club Mini", cat: "Alcoholic"}, {name: "Orijin B/S", cat: "Alcoholic"}, {name: "Orijin mini", cat: "Alcoholic"}, {name: "Shandy B/S", cat: "Alcoholic"}, {name: "Shandy Mini", cat: "Alcoholic"}, {name: "Kings Bottle", cat: "Alcoholic"}, {name: "Eagle Black", cat: "Alcoholic"}, {name: "Eagle white", cat: "Alcoholic"}, {name: "Guinness", cat: "Alcoholic"}, {name: "Smirnoff Bottle", cat: "Alcoholic"}, {name: "Smirnoff Punch", cat: "Alcoholic"}, {name: "Gulder", cat: "Alcoholic"}, {name: "Alomo Btl", cat: "Alcoholic"},
+            {name: "Choice sachets", cat: "Sachets"}, {name: "Adonko 123", cat: "Sachets"}, {name: "Goal sac", cat: "Sachets"}, {name: "Alomo sac", cat: "Sachets"}, {name: "Black Rock", cat: "Sachets"}, {name: "K20 sac", cat: "Sachets"}, {name: "Tonic wine", cat: "Sachets"}, {name: "Kpoo Keke", cat: "Sachets"}, {name: "Herb Afrik", cat: "Sachets"}, {name: "Striker sac", cat: "Sachets"}, {name: "Madingo sac", cat: "Sachets"}, {name: "Obuasi 442", cat: "Sachets"}, {name: "Round 2", cat: "Sachets"}, {name: "Castle Bridge", cat: "Sachets"}, {name: "Sewa sac", cat: "Sachets"},
+            {name: "Fantasy", cat: "IceCream"}, {name: "Frosty 150ml", cat: "IceCream"}, {name: "Chicken", cat: "Misc"}, {name: "Biscuits", cat: "Misc"}
+        ].map((item, idx) => ({ ...item, id: idx + 1, price: 0, stock: 100 }));
+        
+        inventory = fullList;
+        save();
+        alert("SUCCESS! 130 drinks have been added. You can now set prices.");
+    }
 </script>
 </body>
 </html>
