@@ -1,23 +1,155 @@
+<!DOCTYPE html>
+<html>
+<head>
+    <title>Ojoo Amisty Master POS</title>
+    <meta name="viewport" content="width=device-width, initial-scale=1">
+    <script src="https://www.gstatic.com/firebasejs/8.10.0/firebase-app.js"></script>
+    <script src="https://www.gstatic.com/firebasejs/8.10.0/firebase-database.js"></script>
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/xlsx/0.18.5/xlsx.full.min.js"></script>
+    
+    <style>
+        :root { --orange: #f39c12; --bg: #0d0d0d; }
+        body { font-family: 'Segoe UI', sans-serif; background: #050505; color: white; margin: 0; display: flex; height: 100vh; overflow: hidden; }
+
+        /* PIN PAD LOGIN */
+        #login-overlay { position: fixed; inset: 0; background: #000; z-index: 9999; display: flex; flex-direction: column; align-items: center; justify-content: center; }
+        .pin-display { background: #222; padding: 20px; width: 220px; text-align: center; font-size: 30px; margin-bottom: 20px; border-radius: 10px; border: 2px solid var(--orange); height: 40px; color: var(--orange); }
+        .pin-grid { display: grid; grid-template-columns: repeat(3, 1fr); gap: 15px; }
+        .pin-btn { width: 70px; height: 70px; border-radius: 50%; border: 1px solid #333; background: #111; color: white; font-size: 24px; cursor: pointer; }
+        .pin-btn:active { background: var(--orange); color: black; }
+
+        /* SIDEBAR */
+        .sidebar { width: 220px; background: #111; border-right: 1px solid #333; display: flex; flex-direction: column; padding: 20px; flex-shrink: 0; }
+        .nav-btn { background: none; border: 1px solid #222; color: #777; padding: 12px; margin-bottom: 8px; border-radius: 8px; cursor: pointer; text-align: left; font-size: 13px; font-weight: bold; }
+        .nav-btn.active { background: var(--orange); color: black; }
+
+        /* MAIN CONTENT */
+        .main-content { flex: 1; display: flex; flex-direction: column; overflow: hidden; }
+        .header { padding: 15px 25px; background: #000; display: flex; justify-content: space-between; align-items: center; border-bottom: 1px solid #222; }
+        #total-val { font-size: 32px; color: var(--orange); font-weight: 900; }
+        
+        .page-content { flex: 1; padding: 20px; overflow-y: auto; display: none; }
+        .page-content.active { display: block; }
+
+        /* POS CATEGORIES & GRID */
+        .cat-bar { display: flex; gap: 10px; margin-bottom: 20px; overflow-x: auto; padding-bottom: 5px; }
+        .cat-tab { background: #222; color: white; border: none; padding: 8px 18px; border-radius: 20px; cursor: pointer; font-weight: bold; font-size: 12px; }
+        .cat-tab.active { background: white; color: black; }
+        
+        .grid { display: grid; grid-template-columns: repeat(auto-fill, minmax(115px, 1fr)); gap: 12px; }
+        .item-btn { padding: 10px; font-weight: 800; border-radius: 12px; color: #111; height: 85px; border: none; background: #fff; box-shadow: 0 4px #bdc3c7; cursor: pointer; font-size: 10px; text-transform: uppercase; }
+        .item-btn:active { transform: translateY(3px); box-shadow: 0 1px #bdc3c7; }
+
+        table { width: 100%; border-collapse: collapse; margin-top: 10px; }
+        th, td { padding: 12px; border-bottom: 1px solid #222; text-align: left; }
+        input { background: #1a1a1a; color: white; border: 1px solid #333; padding: 8px; border-radius: 4px; }
+    </style>
+</head>
+<body>
+
+<div id="login-overlay">
+    <h2 style="color:var(--orange)">OJOO AMISTY LOUNGE</h2>
+    <div class="pin-display" id="pin-view">****</div>
+    <div class="pin-grid">
+        <button class="pin-btn" onclick="pressPin('1')">1</button>
+        <button class="pin-btn" onclick="pressPin('2')">2</button>
+        <button class="pin-btn" onclick="pressPin('3')">3</button>
+        <button class="pin-btn" onclick="pressPin('4')">4</button>
+        <button class="pin-btn" onclick="pressPin('5')">5</button>
+        <button class="pin-btn" onclick="pressPin('6')">6</button>
+        <button class="pin-btn" onclick="pressPin('7')">7</button>
+        <button class="pin-btn" onclick="pressPin('8')">8</button>
+        <button class="pin-btn" onclick="pressPin('9')">9</button>
+        <button class="pin-btn" style="color:red" onclick="typedPin=''">C</button>
+        <button class="pin-btn" onclick="pressPin('0')">0</button>
+        <button class="pin-btn" style="color:green" onclick="checkPin()">OK</button>
+    </div>
+</div>
+
+<div class="sidebar">
+    <div style="margin-bottom: 20px; font-size: 12px; color: #555;">LOGGED IN: <span id="user-ui" style="color:var(--orange)">...</span></div>
+    <button onclick="showPage('sales-page')" class="nav-btn active">POS TERMINAL</button>
+    <button onclick="showPage('inventory-page')" class="nav-btn">PRICES/INVENTORY</button>
+    <button onclick="showPage('expenses-page')" class="nav-btn">EXPENSES</button>
+    <button onclick="showPage('staff-page')" class="nav-btn">STAFF MANAGER</button>
+    <button onclick="showPage('reports-page')" class="nav-btn">REPORTS/EXCEL</button>
+</div>
+
+<div class="main-content">
+    <div class="header">
+        <h3 id="page-title" style="margin:0; color:#444;">Sales Terminal</h3>
+        <div id="total-val">₵0.00</div>
+    </div>
+
+    <div id="sales-page" class="page-content active">
+        <div class="cat-bar" id="cat-tabs-ui"></div>
+        <div id="item-grid" class="grid"></div>
+    </div>
+
+    <div id="inventory-page" class="page-content">
+        <h3>Master Price List</h3>
+        <table>
+            <thead><tr><th>Drink</th><th>Price (₵)</th></tr></thead>
+            <tbody id="inventory-body"></tbody>
+        </table>
+    </div>
+
+    <div id="staff-page" class="page-content">
+        <h3>Staff Management</h3>
+        <div style="background:#111; padding:15px; border-radius:10px; margin-bottom:20px;">
+            <input type="text" id="new-staff-name" placeholder="Staff Name">
+            <input type="number" id="new-staff-pin" placeholder="PIN Code">
+            <button onclick="addStaff()" style="background:var(--orange); border:none; padding:10px; cursor:pointer;">Add New Staff</button>
+        </div>
+        <table style="width:100%">
+            <thead><tr><th>Name</th><th>PIN</th><th>Action</th></tr></thead>
+            <tbody id="staff-body"></tbody>
+        </table>
+    </div>
+
+    <div id="expenses-page" class="page-content">
+        <h3>Record Expense</h3>
+        <input type="text" id="exp-name" placeholder="Item">
+        <input type="number" id="exp-amt" placeholder="Amount">
+        <button onclick="addExp()" style="background:var(--orange); border:none; padding:10px;">Add</button>
+    </div>
+
+    <div id="reports-page" class="page-content">
+        <h3>Daily Reports</h3>
+        <button onclick="exportToExcel()" style="background:#2ecc71; color:white; padding:15px; border:none; width:100%; cursor:pointer;">DOWNLOAD EXCEL REPORT</button>
+        <button onclick="resetDay()" style="margin-top:50px; background:none; color:red; border:1px solid red; padding:10px;">RESET FOR NEW DAY</button>
+    </div>
+</div>
+
 <script>
     const firebaseConfig = { databaseURL: "https://ojoo-lounge-default-rtdb.firebaseio.com" };
     firebase.initializeApp(firebaseConfig);
     const db = firebase.database();
 
     let typedPin = "";
+    let currentUser = "";
+    let staffList = [
+        { name: "Master", pin: "1012" },
+        { name: "Ako", pin: "3026" },
+        { name: "Essin", pin: "4321" }
+    ];
+
     function pressPin(n) { typedPin += n; document.getElementById('pin-view').innerText = "*".repeat(typedPin.length); }
     
     function checkPin() {
-        if (typedPin === '1012') { 
-            document.getElementById('login-overlay').style.display='none'; 
-            startSync(); 
-        } else { 
-            alert("Wrong PIN"); 
-            typedPin = ""; 
-            document.getElementById('pin-view').innerText = "****"; 
+        const found = staffList.find(s => s.pin === typedPin);
+        if (found) {
+            currentUser = found.name;
+            document.getElementById('user-ui').innerText = currentUser;
+            document.getElementById('login-overlay').style.display='none';
+            startSync();
+        } else {
+            alert("Access Denied");
+            typedPin = "";
+            document.getElementById('pin-view').innerText = "****";
         }
     }
 
-    // Full Inventory List
     let inventory = [
         { name: "Fan max", cat: "Beverages", price: 0 }, { name: "Bel ice", cat: "Beverages", price: 0 },
         { name: "Chin Chin", cat: "Beverages", price: 0 }, { name: "Wellman", cat: "Beverages", price: 0 },
@@ -77,7 +209,7 @@
         { name: "Chicken", cat: "Misc", price: 0 }, { name: "Biscuits", cat: "Misc", price: 0 }
     ].map((item, index) => ({ ...item, id: index + 1 }));
 
-    let salesTotal = 0; let expenses = []; let currentCat = "Beverages";
+    let salesTotal = 0; let expenses = []; let currentCat = "ALL";
 
     function startSync() {
         db.ref('lounge_data').on('value', (s) => {
@@ -85,108 +217,54 @@
             if (data) { 
                 inventory = data.inventory || inventory; 
                 salesTotal = data.salesTotal || 0; 
-                expenses = data.expenses || []; 
-            } else { 
-                save(); 
-            }
+                expenses = data.expenses || [];
+                staffList = data.staffList || staffList;
+            } else { save(); }
             render();
         });
     }
 
     function render() {
-        // Render Category Tabs
-        const cats = ["Beverages", "Alcoholic", "Sachets", "IceCream", "Misc"];
+        // Categories with "ALL" first
+        const cats = ["ALL", "Beverages", "Alcoholic", "Sachets", "IceCream", "Misc"];
         document.getElementById('cat-tabs-ui').innerHTML = cats.map(c => 
             `<button onclick="setCat('${c}')" class="cat-tab ${currentCat===c?'active':''}">${c}</button>`
         ).join('');
 
-        // Render Sales Grid (The Buttons)
+        // Grid Logic
         const grid = document.getElementById('item-grid');
-        const filtered = inventory.filter(i => i.cat === currentCat);
-        grid.innerHTML = filtered.map(i => `
-            <button class="item-btn" onclick="sell(${i.id})">
-                ${i.name || "Unknown"}<br>₵${(i.price || 0).toFixed(2)}
-            </button>
-        `).join('');
+        const itemsToDisplay = currentCat === "ALL" ? inventory : inventory.filter(i => i.cat === currentCat);
+        grid.innerHTML = itemsToDisplay.map(i => `<button class="item-btn" onclick="sell(${i.id})">${i.name}<br>₵${(i.price||0).toFixed(2)}</button>`).join('');
 
-        // Render Inventory Table (Management)
-        document.getElementById('inventory-body').innerHTML = inventory.map(i => `
-            <tr>
-                <td>${i.name || "Unknown"}</td>
-                <td><input type="number" value="${i.price || 0}" onchange="upd(${i.id}, this.value)"></td>
-            </tr>
-        `).join('');
+        // Inventory Table
+        document.getElementById('inventory-body').innerHTML = inventory.map(i => `<tr><td>${i.name}</td><td><input type="number" value="${i.price||0}" onchange="upd(${i.id}, this.value)"></td></tr>`).join('');
 
-        // Updates Totals
-        document.getElementById('total-val').innerText = "₵" + (salesTotal || 0).toFixed(2);
-        document.getElementById('rep-rev').innerText = "₵" + (salesTotal || 0).toFixed(2);
-        const expT = expenses.reduce((a, b) => a + parseFloat(b.amount || 0), 0);
-        document.getElementById('rep-exp').innerText = "₵" + expT.toFixed(2);
+        // Staff Table
+        document.getElementById('staff-body').innerHTML = staffList.map((s, idx) => `<tr><td>${s.name}</td><td>${s.pin}</td><td><button onclick="removeStaff(${idx})" style="color:red; background:none; border:none; cursor:pointer;">Remove</button></td></tr>`).join('');
+
+        document.getElementById('total-val').innerText = "₵" + (salesTotal||0).toFixed(2);
     }
 
     function setCat(c) { currentCat = c; render(); }
+    function sell(id) { salesTotal += parseFloat(inventory.find(x => x.id === id).price || 0); save(); }
+    function upd(id, p) { inventory.find(x => x.id === id).price = parseFloat(p) || 0; save(); }
+    function save() { db.ref('lounge_data').set({inventory, salesTotal, expenses, staffList}); }
+    function showPage(id) { document.querySelectorAll('.page-content').forEach(p => p.style.display='none'); document.getElementById(id).style.display='block'; }
 
-    function sell(id) { 
-        const item = inventory.find(x => x.id === id);
-        if(item) {
-            salesTotal += parseFloat(item.price || 0); 
-            save(); 
-        }
+    function addStaff() {
+        const name = document.getElementById('new-staff-name').value;
+        const pin = document.getElementById('new-staff-pin').value;
+        if(name && pin) { staffList.push({name, pin}); save(); document.getElementById('new-staff-name').value=''; document.getElementById('new-staff-pin').value=''; }
     }
-
-    function upd(id, p) { 
-        const item = inventory.find(x => x.id === id);
-        if(item) {
-            item.price = parseFloat(p) || 0; 
-            save(); 
-        }
-    }
-
-    function addExp() { 
-        const n = document.getElementById('exp-name').value; 
-        const a = document.getElementById('exp-amt').value; 
-        if(n && a) { 
-            expenses.push({name:n, amount:parseFloat(a)}); 
-            save(); 
-            document.getElementById('exp-name').value = '';
-            document.getElementById('exp-amt').value = '';
-        } 
-    }
-
-    function save() { 
-        db.ref('lounge_data').set({
-            inventory: inventory, 
-            salesTotal: salesTotal, 
-            expenses: expenses
-        }); 
-    }
-
-    function showPage(id) { 
-        document.querySelectorAll('.page-content').forEach(p => p.style.display='none'); 
-        document.getElementById(id).style.display='block'; 
-    }
-
-    function resetDay() { 
-        if(confirm("Are you sure you want to reset all sales and expenses for a new day?")) { 
-            salesTotal = 0; 
-            expenses = []; 
-            save(); 
-        } 
-    }
-
+    function removeStaff(idx) { if(confirm("Remove this staff?")) { staffList.splice(idx, 1); save(); } }
+    function resetDay() { if(confirm("Reset all for new day?")) { salesTotal = 0; expenses = []; save(); } }
     function exportToExcel() {
-        let reportData = [
-            ["Ojoo Amisty Lounge - Daily Report"],
-            ["Type", "Name", "Amount"],
-            ["REVENUE", "Total Sales", salesTotal.toFixed(2)]
-        ];
-        expenses.forEach(e => reportData.push(["EXPENSE", e.name, parseFloat(e.amount).toFixed(2)]));
-        reportData.push(["---", "---", "---"]);
-        reportData.push(["NET PROFIT", "", (salesTotal - expenses.reduce((a,b)=>a+parseFloat(b.amount),0)).toFixed(2)]);
-
+        let reportData = [["Ojoo Amisty Lounge"], ["Type", "Name", "Amount"], ["REVENUE", "Sales", salesTotal.toFixed(2)]];
         let ws = XLSX.utils.aoa_to_sheet(reportData);
         let wb = XLSX.utils.book_new();
-        XLSX.utils.book_append_sheet(wb, ws, "DailyReport");
-        XLSX.writeFile(wb, "Ojoo_Lounge_Report.xlsx");
+        XLSX.utils.book_append_sheet(wb, ws, "Report");
+        XLSX.writeFile(wb, "Report.xlsx");
     }
 </script>
+</body>
+</html>
