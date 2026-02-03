@@ -1,7 +1,7 @@
 <!DOCTYPE html>
 <html>
 <head>
-    <title>Ojoo Amisty Master POS</title>
+    <title>Ojoo Amisty Lounge - Master Control</title>
     <meta name="viewport" content="width=device-width, initial-scale=1">
     <script src="https://www.gstatic.com/firebasejs/8.10.0/firebase-app.js"></script>
     <script src="https://www.gstatic.com/firebasejs/8.10.0/firebase-database.js"></script>
@@ -11,9 +11,9 @@
         :root { --orange: #f39c12; --bg: #0d0d0d; }
         body { font-family: 'Segoe UI', sans-serif; background: #050505; color: white; margin: 0; display: flex; height: 100vh; overflow: hidden; }
 
-        /* PIN PAD LOGIN */
+        /* LOGIN */
         #login-overlay { position: fixed; inset: 0; background: #000; z-index: 9999; display: flex; flex-direction: column; align-items: center; justify-content: center; }
-        .pin-display { background: #222; padding: 20px; width: 220px; text-align: center; font-size: 30px; margin-bottom: 20px; border-radius: 10px; border: 2px solid var(--orange); height: 40px; color: var(--orange); }
+        .pin-display { background: #222; padding: 20px; width: 220px; text-align: center; font-size: 30px; margin-bottom: 20px; border-radius: 10px; border: 2px solid var(--orange); color: var(--orange); height: 40px; }
         .pin-grid { display: grid; grid-template-columns: repeat(3, 1fr); gap: 15px; }
         .pin-btn { width: 70px; height: 70px; border-radius: 50%; border: 1px solid #333; background: #111; color: white; font-size: 24px; cursor: pointer; }
         .pin-btn:active { background: var(--orange); color: black; }
@@ -22,8 +22,9 @@
         .sidebar { width: 220px; background: #111; border-right: 1px solid #333; display: flex; flex-direction: column; padding: 20px; flex-shrink: 0; }
         .nav-btn { background: none; border: 1px solid #222; color: #777; padding: 12px; margin-bottom: 8px; border-radius: 8px; cursor: pointer; text-align: left; font-size: 13px; font-weight: bold; }
         .nav-btn.active { background: var(--orange); color: black; }
+        .admin-only { display: none; }
 
-        /* MAIN CONTENT */
+        /* CONTENT */
         .main-content { flex: 1; display: flex; flex-direction: column; overflow: hidden; }
         .header { padding: 15px 25px; background: #000; display: flex; justify-content: space-between; align-items: center; border-bottom: 1px solid #222; }
         #total-val { font-size: 32px; color: var(--orange); font-weight: 900; }
@@ -31,18 +32,17 @@
         .page-content { flex: 1; padding: 20px; overflow-y: auto; display: none; }
         .page-content.active { display: block; }
 
-        /* POS CATEGORIES & GRID */
         .cat-bar { display: flex; gap: 10px; margin-bottom: 20px; overflow-x: auto; padding-bottom: 5px; }
-        .cat-tab { background: #222; color: white; border: none; padding: 8px 18px; border-radius: 20px; cursor: pointer; font-weight: bold; font-size: 12px; }
+        .cat-tab { background: #222; color: white; border: none; padding: 8px 18px; border-radius: 20px; cursor: pointer; font-size: 12px; font-weight: bold; }
         .cat-tab.active { background: white; color: black; }
         
         .grid { display: grid; grid-template-columns: repeat(auto-fill, minmax(115px, 1fr)); gap: 12px; }
         .item-btn { padding: 10px; font-weight: 800; border-radius: 12px; color: #111; height: 85px; border: none; background: #fff; box-shadow: 0 4px #bdc3c7; cursor: pointer; font-size: 10px; text-transform: uppercase; }
-        .item-btn:active { transform: translateY(3px); box-shadow: 0 1px #bdc3c7; }
 
-        table { width: 100%; border-collapse: collapse; margin-top: 10px; }
+        .form-box { background: #111; padding: 15px; border-radius: 10px; margin-bottom: 20px; border: 1px solid #222; }
+        input, select { background: #1a1a1a; color: white; border: 1px solid #333; padding: 10px; border-radius: 5px; margin-right: 10px; margin-bottom: 10px; width: 200px; }
+        table { width: 100%; border-collapse: collapse; }
         th, td { padding: 12px; border-bottom: 1px solid #222; text-align: left; }
-        input { background: #1a1a1a; color: white; border: 1px solid #333; padding: 8px; border-radius: 4px; }
     </style>
 </head>
 <body>
@@ -67,18 +67,24 @@
 </div>
 
 <div class="sidebar">
-    <div style="margin-bottom: 20px; font-size: 12px; color: #555;">LOGGED IN: <span id="user-ui" style="color:var(--orange)">...</span></div>
+    <div style="margin-bottom: 20px; font-size: 12px; color: #555;">USER: <span id="user-ui" style="color:var(--orange)">...</span></div>
     <button onclick="showPage('sales-page')" class="nav-btn active">POS TERMINAL</button>
-    <button onclick="showPage('inventory-page')" class="nav-btn">PRICES/INVENTORY</button>
+    <button onclick="showPage('surplus-page')" class="nav-btn">RECORD SURPLUS</button>
     <button onclick="showPage('expenses-page')" class="nav-btn">EXPENSES</button>
-    <button onclick="showPage('staff-page')" class="nav-btn">STAFF MANAGER</button>
-    <button onclick="showPage('reports-page')" class="nav-btn">REPORTS/EXCEL</button>
+    
+    <div id="admin-menu" class="admin-only">
+        <hr style="border:0; border-top:1px solid #222; margin:15px 0;">
+        <button onclick="showPage('inventory-page')" class="nav-btn">PRICE MANAGEMENT</button>
+        <button onclick="showPage('add-drink-page')" class="nav-btn">ADD NEW DRINKS</button>
+        <button onclick="showPage('staff-page')" class="nav-btn">STAFF MANAGER</button>
+        <button onclick="showPage('reports-page')" class="nav-btn">REPORTS / EXCEL</button>
+    </div>
 </div>
 
 <div class="main-content">
     <div class="header">
         <h3 id="page-title" style="margin:0; color:#444;">Sales Terminal</h3>
-        <div id="total-val">₵0.00</div>
+        <div id="total-val">₵***</div>
     </div>
 
     <div id="sales-page" class="page-content active">
@@ -86,38 +92,61 @@
         <div id="item-grid" class="grid"></div>
     </div>
 
+    <div id="surplus-page" class="page-content">
+        <h3>Record Surplus / Promo Money</h3>
+        <p style="color:#777; font-size: 13px;">Use this when a drink is sold higher than the system price (e.g. Programs).</p>
+        <div class="form-box">
+            <input type="number" id="surplus-amt" placeholder="Extra Amount (₵)">
+            <input type="text" id="surplus-note" placeholder="Reason (e.g. Xmas Promo)">
+            <button onclick="addSurplus()" style="background:#2ecc71; border:none; padding:10px; font-weight:bold; cursor:pointer;">RECORD EXTRA MONEY</button>
+        </div>
+        <table style="width:100%"><tbody id="surplus-body"></tbody></table>
+    </div>
+
+    <div id="add-drink-page" class="page-content">
+        <h3>Add New Drink</h3>
+        <div class="form-box">
+            <input type="text" id="new-item-name" placeholder="Drink Name">
+            <input type="number" id="new-item-price" placeholder="Price (₵)">
+            <select id="new-item-cat">
+                <option value="Beverages">Beverages</option>
+                <option value="Alcoholic">Alcoholic</option>
+                <option value="Sachets">Sachets</option>
+                <option value="IceCream">Ice Cream</option>
+                <option value="Misc">Misc</option>
+            </select>
+            <button onclick="addNewDrink()" style="background:var(--orange); border:none; padding:10px;">ADD DRINK</button>
+        </div>
+    </div>
+
     <div id="inventory-page" class="page-content">
-        <h3>Master Price List</h3>
-        <table>
-            <thead><tr><th>Drink</th><th>Price (₵)</th></tr></thead>
-            <tbody id="inventory-body"></tbody>
-        </table>
+        <h3>Prices</h3>
+        <table id="inv-table"><thead><tr><th>Drink</th><th>Price</th><th>Del</th></tr></thead><tbody id="inventory-body"></tbody></table>
     </div>
 
     <div id="staff-page" class="page-content">
-        <h3>Staff Management</h3>
-        <div style="background:#111; padding:15px; border-radius:10px; margin-bottom:20px;">
-            <input type="text" id="new-staff-name" placeholder="Staff Name">
-            <input type="number" id="new-staff-pin" placeholder="PIN Code">
-            <button onclick="addStaff()" style="background:var(--orange); border:none; padding:10px; cursor:pointer;">Add New Staff</button>
-        </div>
-        <table style="width:100%">
-            <thead><tr><th>Name</th><th>PIN</th><th>Action</th></tr></thead>
-            <tbody id="staff-body"></tbody>
-        </table>
+        <h3>Staff</h3>
+        <div class="form-box"><input type="text" id="new-staff-name" placeholder="Name"><input type="number" id="new-staff-pin" placeholder="PIN"><button onclick="addStaff()">Add</button></div>
+        <table><tbody id="staff-body"></tbody></table>
     </div>
 
     <div id="expenses-page" class="page-content">
-        <h3>Record Expense</h3>
-        <input type="text" id="exp-name" placeholder="Item">
-        <input type="number" id="exp-amt" placeholder="Amount">
-        <button onclick="addExp()" style="background:var(--orange); border:none; padding:10px;">Add</button>
+        <h3>Daily Expenses</h3>
+        <div class="form-box"><input type="text" id="exp-name" placeholder="Item"><input type="number" id="exp-amt" placeholder="Amount"><button onclick="addExp()">Save</button></div>
+        <table style="width:100%"><tbody id="exp-body"></tbody></table>
     </div>
 
     <div id="reports-page" class="page-content">
-        <h3>Daily Reports</h3>
+        <h3>Financial Report</h3>
+        <div style="background:#111; padding:20px; border-radius:10px; margin-bottom:20px;">
+            <p>Standard Sales: <span id="rep-rev">₵0.00</span></p>
+            <p>Surplus/Promo Money: <span id="rep-surplus" style="color:#2ecc71">₵0.00</span></p>
+            <p>Expenses: <span id="rep-exp" style="color:red">₵0.00</span></p>
+            <hr>
+            <h2>Grand Total: <span id="rep-grand" style="color:var(--orange)">₵0.00</span></h2>
+        </div>
         <button onclick="exportToExcel()" style="background:#2ecc71; color:white; padding:15px; border:none; width:100%; cursor:pointer;">DOWNLOAD EXCEL REPORT</button>
-        <button onclick="resetDay()" style="margin-top:50px; background:none; color:red; border:1px solid red; padding:10px;">RESET FOR NEW DAY</button>
+        <button onclick="resetDay()" style="margin-top:50px; background:none; color:red; border:1px solid red; padding:5px;">RESET SYSTEM FOR NEW DAY</button>
     </div>
 </div>
 
@@ -126,144 +155,91 @@
     firebase.initializeApp(firebaseConfig);
     const db = firebase.database();
 
-    let typedPin = "";
-    let currentUser = "";
-    let staffList = [
-        { name: "Master", pin: "1012" },
-        { name: "Ako", pin: "3026" },
-        { name: "Essin", pin: "4321" }
-    ];
+    let typedPin = "", currentUser = "", isAdmin = false;
+    let staffList = [{ name: "Master", pin: "1012" }, { name: "Ako", pin: "3026" }, { name: "Essin", pin: "4321" }];
+    let inventory = [], salesTotal = 0, expenses = [], surplusEntries = [];
 
     function pressPin(n) { typedPin += n; document.getElementById('pin-view').innerText = "*".repeat(typedPin.length); }
     
     function checkPin() {
         const found = staffList.find(s => s.pin === typedPin);
         if (found) {
-            currentUser = found.name;
+            currentUser = found.name; isAdmin = (found.pin === "1012");
             document.getElementById('user-ui').innerText = currentUser;
             document.getElementById('login-overlay').style.display='none';
+            if(isAdmin) document.getElementById('admin-menu').style.display = 'block';
             startSync();
-        } else {
-            alert("Access Denied");
-            typedPin = "";
-            document.getElementById('pin-view').innerText = "****";
-        }
+        } else { alert("Wrong PIN"); typedPin = ""; document.getElementById('pin-view').innerText = "****"; }
     }
-
-    let inventory = [
-        { name: "Fan max", cat: "Beverages", price: 0 }, { name: "Bel ice", cat: "Beverages", price: 0 },
-        { name: "Chin Chin", cat: "Beverages", price: 0 }, { name: "Wellman", cat: "Beverages", price: 0 },
-        { name: "Vitamilk", cat: "Beverages", price: 0 }, { name: "Coke Bottle", cat: "Beverages", price: 0 },
-        { name: "Fanta Bottle", cat: "Beverages", price: 0 }, { name: "Malt Bottle", cat: "Beverages", price: 0 },
-        { name: "Sprite Bottle", cat: "Beverages", price: 0 }, { name: "Malt Plastic", cat: "Beverages", price: 0 },
-        { name: "Frutelli", cat: "Beverages", price: 0 }, { name: "Ceres", cat: "Beverages", price: 0 },
-        { name: "Hollandia S/S", cat: "Beverages", price: 0 }, { name: "Hollandia B/S", cat: "Beverages", price: 0 },
-        { name: "Can Fanta", cat: "Beverages", price: 0 }, { name: "Can Coke", cat: "Beverages", price: 0 },
-        { name: "Pukka Drink", cat: "Beverages", price: 0 }, { name: "Pukka Extra", cat: "Beverages", price: 0 },
-        { name: "5 Star", cat: "Beverages", price: 0 }, { name: "Lucozade bottle", cat: "Beverages", price: 0 },
-        { name: "Lucozade can", cat: "Beverages", price: 0 }, { name: "Beta Malt", cat: "Beverages", price: 0 },
-        { name: "Don Simon S/S", cat: "Beverages", price: 0 }, { name: "Don Simon B/S", cat: "Beverages", price: 0 },
-        { name: "Water S/S", cat: "Beverages", price: 0 }, { name: "Water M/S", cat: "Beverages", price: 0 },
-        { name: "Water B/S", cat: "Beverages", price: 0 }, { name: "Tampico S/S", cat: "Beverages", price: 0 },
-        { name: "Tampico M/S", cat: "Beverages", price: 0 }, { name: "Vim Energy", cat: "Beverages", price: 0 },
-        { name: "Storm B/S", cat: "Beverages", price: 0 }, { name: "Storm S/S", cat: "Beverages", price: 0 },
-        { name: "Wheat B/S", cat: "Beverages", price: 0 }, { name: "Wheat S/S", cat: "Beverages", price: 0 },
-        { name: "Blue Jeans", cat: "Beverages", price: 0 }, { name: "Festival Choc", cat: "Beverages", price: 0 },
-        { name: "Ceres Bottle", cat: "Beverages", price: 0 }, { name: "Arizona", cat: "Beverages", price: 0 },
-        { name: "Abest Coffee", cat: "Beverages", price: 0 }, { name: "Champagne", cat: "Beverages", price: 0 },
-        { name: "Scavi & Ray", cat: "Beverages", price: 0 }, { name: "Apple Juice", cat: "Beverages", price: 0 },
-        { name: "Darling", cat: "Alcoholic", price: 0 }, { name: "Panache", cat: "Alcoholic", price: 0 },
-        { name: "Kiss", cat: "Alcoholic", price: 0 }, { name: "Faxe", cat: "Alcoholic", price: 0 },
-        { name: "Stella Artois", cat: "Alcoholic", price: 0 }, { name: "Budweiser", cat: "Alcoholic", price: 0 },
-        { name: "Brutal Fruit", cat: "Alcoholic", price: 0 }, { name: "Hunters", cat: "Alcoholic", price: 0 },
-        { name: "8pm M/S", cat: "Alcoholic", price: 0 }, { name: "8pm S/S", cat: "Alcoholic", price: 0 },
-        { name: "8pm B/S", cat: "Alcoholic", price: 0 }, { name: "Afribull", cat: "Alcoholic", price: 0 },
-        { name: "Red Label", cat: "Alcoholic", price: 0 }, { name: "Black Label", cat: "Alcoholic", price: 0 },
-        { name: "Obuasi Gringo", cat: "Alcoholic", price: 0 }, { name: "Old Admiral S/S", cat: "Alcoholic", price: 0 },
-        { name: "Old Admiral M/S", cat: "Alcoholic", price: 0 }, { name: "Old Admiral B/S", cat: "Alcoholic", price: 0 },
-        { name: "Obuasi Btl", cat: "Alcoholic", price: 0 }, { name: "Strawberry Btl", cat: "Alcoholic", price: 0 },
-        { name: "Charlie Btl", cat: "Alcoholic", price: 0 }, { name: "Jojo", cat: "Alcoholic", price: 0 },
-        { name: "Schnapp Rubber", cat: "Alcoholic", price: 0 }, { name: "Schnapp Kente", cat: "Alcoholic", price: 0 },
-        { name: "Schnapp Local", cat: "Alcoholic", price: 0 }, { name: "Coke B/S", cat: "Alcoholic", price: 0 },
-        { name: "Captain Morgan", cat: "Alcoholic", price: 0 }, { name: "Don Luciano", cat: "Alcoholic", price: 0 },
-        { name: "JP Chenet", cat: "Alcoholic", price: 0 }, { name: "Wine", cat: "Alcoholic", price: 0 },
-        { name: "DeRay Ginger", cat: "Alcoholic", price: 0 }, { name: "DeRay Bottle", cat: "Alcoholic", price: 0 },
-        { name: "Amuzu Bottle", cat: "Alcoholic", price: 0 }, { name: "Lime Bottle", cat: "Alcoholic", price: 0 },
-        { name: "Vody", cat: "Alcoholic", price: 0 }, { name: "Bullet", cat: "Alcoholic", price: 0 },
-        { name: "Smirnoff can", cat: "Alcoholic", price: 0 }, { name: "Club B/S", cat: "Alcoholic", price: 0 },
-        { name: "Club Mini", cat: "Alcoholic", price: 0 }, { name: "Orijin B/S", cat: "Alcoholic", price: 0 },
-        { name: "Orijin mini", cat: "Alcoholic", price: 0 }, { name: "Shandy B/S", cat: "Alcoholic", price: 0 },
-        { name: "Shandy Mini", cat: "Alcoholic", price: 0 }, { name: "Kings Bottle", cat: "Alcoholic", price: 0 },
-        { name: "Eagle Black", cat: "Alcoholic", price: 0 }, { name: "Eagle white", cat: "Alcoholic", price: 0 },
-        { name: "Guinness", cat: "Alcoholic", price: 0 }, { name: "Smirnoff Bottle", cat: "Alcoholic", price: 0 },
-        { name: "Smirnoff Punch", cat: "Alcoholic", price: 0 }, { name: "Gulder", cat: "Alcoholic", price: 0 },
-        { name: "Alomo Btl", cat: "Alcoholic", price: 0 }, { name: "Choice sachets", cat: "Sachets", price: 0 },
-        { name: "Adonko 123", cat: "Sachets", price: 0 }, { name: "Goal sac", cat: "Sachets", price: 0 },
-        { name: "Alomo sac", cat: "Sachets", price: 0 }, { name: "Black Rock", cat: "Sachets", price: 0 },
-        { name: "K20 sac", cat: "Sachets", price: 0 }, { name: "Tonic wine", cat: "Sachets", price: 0 },
-        { name: "Kpoo Keke", cat: "Sachets", price: 0 }, { name: "Herb Afrik", cat: "Sachets", price: 0 },
-        { name: "Striker sac", cat: "Sachets", price: 0 }, { name: "Madingo sac", cat: "Sachets", price: 0 },
-        { name: "Obuasi 442", cat: "Sachets", price: 0 }, { name: "Round 2", cat: "Sachets", price: 0 },
-        { name: "Castle Bridge", cat: "Sachets", price: 0 }, { name: "Sewa sac", cat: "Sachets", price: 0 },
-        { name: "Fantasy", cat: "IceCream", price: 0 }, { name: "Frosty 150ml", cat: "IceCream", price: 0 },
-        { name: "Chicken", cat: "Misc", price: 0 }, { name: "Biscuits", cat: "Misc", price: 0 }
-    ].map((item, index) => ({ ...item, id: index + 1 }));
-
-    let salesTotal = 0; let expenses = []; let currentCat = "ALL";
 
     function startSync() {
         db.ref('lounge_data').on('value', (s) => {
-            const data = s.val();
-            if (data) { 
-                inventory = data.inventory || inventory; 
-                salesTotal = data.salesTotal || 0; 
-                expenses = data.expenses || [];
-                staffList = data.staffList || staffList;
-            } else { save(); }
+            const data = s.val() || {};
+            inventory = data.inventory || [];
+            salesTotal = data.salesTotal || 0;
+            expenses = data.expenses || [];
+            staffList = data.staffList || staffList;
+            surplusEntries = data.surplusEntries || [];
             render();
         });
     }
 
     function render() {
-        // Categories with "ALL" first
+        const totalSurplus = surplusEntries.reduce((a, b) => a + parseFloat(b.amount || 0), 0);
+        const expTotal = expenses.reduce((a, b) => a + parseFloat(b.amount || 0), 0);
+        
+        document.getElementById('total-val').innerText = isAdmin ? "₵" + (salesTotal + totalSurplus).toFixed(2) : "₵***";
+        
         const cats = ["ALL", "Beverages", "Alcoholic", "Sachets", "IceCream", "Misc"];
-        document.getElementById('cat-tabs-ui').innerHTML = cats.map(c => 
-            `<button onclick="setCat('${c}')" class="cat-tab ${currentCat===c?'active':''}">${c}</button>`
-        ).join('');
+        const currentCat = window.selectedCat || "ALL";
+        document.getElementById('cat-tabs-ui').innerHTML = cats.map(c => `<button onclick="setCat('${c}')" class="cat-tab ${currentCat===c?'active':''}">${c}</button>`).join('');
 
-        // Grid Logic
-        const grid = document.getElementById('item-grid');
-        const itemsToDisplay = currentCat === "ALL" ? inventory : inventory.filter(i => i.cat === currentCat);
-        grid.innerHTML = itemsToDisplay.map(i => `<button class="item-btn" onclick="sell(${i.id})">${i.name}<br>₵${(i.price||0).toFixed(2)}</button>`).join('');
+        const gridItems = currentCat === "ALL" ? inventory : inventory.filter(i => i.cat === currentCat);
+        document.getElementById('item-grid').innerHTML = gridItems.map(i => `<button class="item-btn" onclick="sell(${i.id})">${i.name}<br>₵${(i.price||0).toFixed(2)}</button>`).join('');
 
-        // Inventory Table
-        document.getElementById('inventory-body').innerHTML = inventory.map(i => `<tr><td>${i.name}</td><td><input type="number" value="${i.price||0}" onchange="upd(${i.id}, this.value)"></td></tr>`).join('');
-
-        // Staff Table
-        document.getElementById('staff-body').innerHTML = staffList.map((s, idx) => `<tr><td>${s.name}</td><td>${s.pin}</td><td><button onclick="removeStaff(${idx})" style="color:red; background:none; border:none; cursor:pointer;">Remove</button></td></tr>`).join('');
-
-        document.getElementById('total-val').innerText = "₵" + (salesTotal||0).toFixed(2);
+        if(isAdmin) {
+            document.getElementById('inventory-body').innerHTML = inventory.map(i => `<tr><td>${i.name}</td><td><input type="number" value="${i.price}" onchange="upd(${i.id}, this.value)"></td><td><button onclick="removeItem(${i.id})">X</button></td></tr>`).join('');
+            document.getElementById('staff-body').innerHTML = staffList.map((s, idx) => `<tr><td>${s.name}</td><td>${s.pin}</td><td><button onclick="removeStaff(${idx})">Del</button></td></tr>`).join('');
+            document.getElementById('rep-rev').innerText = "₵" + salesTotal.toFixed(2);
+            document.getElementById('rep-surplus').innerText = "₵" + totalSurplus.toFixed(2);
+            document.getElementById('rep-exp').innerText = "₵" + expTotal.toFixed(2);
+            document.getElementById('rep-grand').innerText = "₵" + (salesTotal + totalSurplus - expTotal).toFixed(2);
+        }
+        document.getElementById('surplus-body').innerHTML = surplusEntries.map(s => `<tr><td>${s.note}</td><td>₵${s.amount}</td></tr>`).join('');
+        document.getElementById('exp-body').innerHTML = expenses.map(e => `<tr><td>${e.name}</td><td>₵${e.amount}</td></tr>`).join('');
     }
 
-    function setCat(c) { currentCat = c; render(); }
+    function setCat(c) { window.selectedCat = c; render(); }
     function sell(id) { salesTotal += parseFloat(inventory.find(x => x.id === id).price || 0); save(); }
-    function upd(id, p) { inventory.find(x => x.id === id).price = parseFloat(p) || 0; save(); }
-    function save() { db.ref('lounge_data').set({inventory, salesTotal, expenses, staffList}); }
-    function showPage(id) { document.querySelectorAll('.page-content').forEach(p => p.style.display='none'); document.getElementById(id).style.display='block'; }
-
-    function addStaff() {
-        const name = document.getElementById('new-staff-name').value;
-        const pin = document.getElementById('new-staff-pin').value;
-        if(name && pin) { staffList.push({name, pin}); save(); document.getElementById('new-staff-name').value=''; document.getElementById('new-staff-pin').value=''; }
+    function upd(id, p) { inventory.find(x => x.id === id).price = parseFloat(p); save(); }
+    
+    function addSurplus() {
+        const amt = document.getElementById('surplus-amt').value;
+        const note = document.getElementById('surplus-note').value;
+        if(amt && note) { surplusEntries.push({amount: parseFloat(amt), note: note}); save(); document.getElementById('surplus-amt').value=''; document.getElementById('surplus-note').value=''; }
     }
-    function removeStaff(idx) { if(confirm("Remove this staff?")) { staffList.splice(idx, 1); save(); } }
-    function resetDay() { if(confirm("Reset all for new day?")) { salesTotal = 0; expenses = []; save(); } }
+
+    function addNewDrink() {
+        const name = document.getElementById('new-item-name').value;
+        const price = document.getElementById('new-item-price').value;
+        const cat = document.getElementById('new-item-cat').value;
+        if(name && price) { inventory.push({ id: Date.now(), name, price: parseFloat(price), cat }); save(); alert("Added!"); }
+    }
+
+    function addExp() {
+        const n = document.getElementById('exp-name').value, a = document.getElementById('exp-amt').value;
+        if(n && a) { expenses.push({name:n, amount:a}); save(); document.getElementById('exp-name').value=''; document.getElementById('exp-amt').value=''; }
+    }
+
+    function save() { db.ref('lounge_data').set({inventory, salesTotal, expenses, staffList, surplusEntries}); }
+    function showPage(id) { document.querySelectorAll('.page-content').forEach(p => p.classList.remove('active')); document.getElementById(id).classList.add('active'); }
+    function resetDay() { if(confirm("Reset Day?")) { salesTotal = 0; expenses = []; surplusEntries = []; save(); } }
     function exportToExcel() {
-        let reportData = [["Ojoo Amisty Lounge"], ["Type", "Name", "Amount"], ["REVENUE", "Sales", salesTotal.toFixed(2)]];
-        let ws = XLSX.utils.aoa_to_sheet(reportData);
-        let wb = XLSX.utils.book_new();
-        XLSX.utils.book_append_sheet(wb, ws, "Report");
-        XLSX.writeFile(wb, "Report.xlsx");
+        let data = [["Ojoo Amisty Lounge Report"], ["Type", "Name/Note", "Amount"], ["REVENUE", "Standard Sales", salesTotal]];
+        surplusEntries.forEach(s => data.push(["SURPLUS", s.note, s.amount]));
+        expenses.forEach(e => data.push(["EXPENSE", e.name, e.amount]));
+        let ws = XLSX.utils.aoa_to_sheet(data);
+        let wb = XLSX.utils.book_new(); XLSX.utils.book_append_sheet(wb, ws, "DailyReport"); XLSX.writeFile(wb, "Report.xlsx");
     }
 </script>
 </body>
