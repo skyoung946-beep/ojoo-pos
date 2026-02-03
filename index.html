@@ -211,4 +211,43 @@
     }
 </script>
 </body>
+    <script src="https://www.gstatic.com/firebasejs/8.10.0/firebase-app.js"></script>
+<script src="https://www.gstatic.com/firebasejs/8.10.0/firebase-database.js"></script>
+
+<script>
+    // 1. Connection Config
+    const firebaseConfig = {
+        databaseURL: "https://ojoo-lounge-default-rtdb.firebaseio.com"
+    };
+
+    // 2. Initialize
+    if (!firebase.apps.length) {
+        firebase.initializeApp(firebaseConfig);
+    }
+    const db = firebase.database();
+
+    // 3. The Sync Function
+    // This sends data to the cloud whenever a sale or price change happens
+    function syncData() {
+        db.ref('ojoo_data').set({
+            inventory: inventory,
+            sales: sales,
+            todayCash: todayCash
+        });
+    }
+
+    // 4. The Listener
+    // This watches the cloud and updates the screen automatically
+    db.ref('ojoo_data').on('value', (snapshot) => {
+        const data = snapshot.val();
+        if (data) {
+            inventory = data.inventory;
+            sales = data.sales;
+            todayCash = data.todayCash;
+            renderMenu(); // Refresh the buttons
+            updateTotal(); // Refresh the cash
+        }
+    });
+</script>
 </html>
+
