@@ -98,20 +98,18 @@
         let salesTotal = 0;
 
         // --- 2. THE HANDSHAKE (SYNC) ---
-        function startSync() {
-            db.ref('lounge_data').on('value', (snapshot) => {
-                const data = snapshot.val();
-                if (data) {
-                    inventory = data.inventory || inventory;
-                    salesTotal = data.salesTotal || 0;
-                    renderMenu();
-                    document.getElementById('total-val').innerText = salesTotal.toFixed(2);
-                } else {
-                    // If DB is empty, push initial inventory
-                    saveToCloud();
-                }
-            });
+    function startSync() {
+    db.ref('lounge_data').on('value', (snapshot) => {
+        const data = snapshot.val();
+        if (data) {
+            inventory = data.inventory;
+            salesTotal = data.salesTotal || 0;
+            // THIS LINE IS CRUCIAL:
+            renderMenu(); 
+            document.getElementById('total-val').innerText = salesTotal.toFixed(2);
         }
+    });
+}
 
         function saveToCloud() {
             db.ref('lounge_data').set({
@@ -173,6 +171,7 @@
     </script>
 </body>
 </html>
+
 
 
 
