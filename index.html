@@ -2,89 +2,135 @@
 <html>
 <head>
     <title>Ojoo Amisty Lounge - Pro POS</title>
-    <meta name="viewport" content="width=device-width, initial-scale=1">
+    <meta name="viewport" content="width=device-width, initial-scale=1, maximum-scale=1, user-scalable=no">
     <script src="https://www.gstatic.com/firebasejs/8.10.0/firebase-app.js"></script>
     <script src="https://www.gstatic.com/firebasejs/8.10.0/firebase-database.js"></script>
     <script src="https://cdnjs.cloudflare.com/ajax/libs/xlsx/0.18.5/xlsx.full.min.js"></script>
     
     <style>
-        :root { --orange: #f39c12; --bg: #0d0d0d; }
-        body { font-family: 'Segoe UI', sans-serif; background: #050505; color: white; margin: 0; display: flex; height: 100vh; overflow: hidden; }
+        :root { 
+            --orange: #f39c12; 
+            --bg: #050505; 
+            --red: #e74c3c; 
+            --green: #2ecc71; 
+            --admin-blue: #0a192f; /* Midnight Blue for Admin */
+            --admin-border: #1e3a8a;
+        }
+        body { font-family: 'Segoe UI', system-ui, sans-serif; background: var(--bg); color: white; margin: 0; display: flex; height: 100vh; overflow: hidden; }
 
-        /* LOGIN */
-        #login-overlay { position: fixed; inset: 0; background: #000; z-index: 9999; display: flex; flex-direction: column; align-items: center; justify-content: center; }
-        .pin-display { background: #222; padding: 20px; width: 220px; text-align: center; font-size: 30px; margin-bottom: 20px; border-radius: 10px; border: 2px solid var(--orange); color: var(--orange); height: 40px; }
-        .pin-grid { display: grid; grid-template-columns: repeat(3, 1fr); gap: 15px; }
-        .pin-btn { width: 70px; height: 70px; border-radius: 50%; border: 1px solid #333; background: #111; color: white; font-size: 24px; cursor: pointer; }
-
-        /* SIDEBAR */
-        .sidebar { width: 200px; background: #111; border-right: 1px solid #333; display: flex; flex-direction: column; padding: 20px; flex-shrink: 0; overflow-y: auto; }
-        .nav-btn { background: none; border: 1px solid #222; color: #777; padding: 12px; margin-bottom: 8px; border-radius: 8px; cursor: pointer; text-align: left; font-size: 13px; font-weight: bold; width: 100%; }
-        .nav-btn.active { background: var(--orange); color: black; }
-        .admin-only { display: none; }
-
-        /* MAIN */
-        .main-content { flex: 1; display: flex; flex-direction: row; overflow: hidden; }
-        .pos-section { flex: 2; display: flex; flex-direction: column; padding: 20px; overflow-y: auto; }
-        .cart-section { width: 300px; background: #111; border-left: 1px solid #333; padding: 20px; display: flex; flex-direction: column; }
-
-        /* GRID */
-        .grid { display: grid; grid-template-columns: repeat(auto-fill, minmax(110px, 1fr)); gap: 10px; }
-        .item-btn { padding: 10px; border-radius: 12px; color: #111; height: 95px; border: none; background: #fff; cursor: pointer; font-size: 10px; font-weight: bold; text-align: center; position: relative; }
-        .stock-tag { position: absolute; top: 5px; right: 5px; background: #000; color: #fff; padding: 2px 5px; border-radius: 4px; font-size: 9px; }
-
-        .form-box { background: #111; padding: 15px; border-radius: 10px; border: 1px solid #333; margin-bottom: 20px; }
-        input, select { background: #1a1a1a; color: white; border: 1px solid #333; padding: 10px; border-radius: 5px; margin-bottom: 10px; width: 90%; }
-        table { width: 100%; border-collapse: collapse; }
-        th, td { padding: 10px; border-bottom: 1px solid #222; text-align: left; }
+        /* SIDEBAR - ADMIN THEMED */
+        .sidebar { width: 220px; background: var(--admin-blue); border-right: 1px solid var(--admin-border); display: flex; flex-direction: column; padding: 15px; flex-shrink: 0; }
         
+        #login-overlay { position: fixed; inset: 0; background: #000; z-index: 9999; display: flex; flex-direction: column; align-items: center; justify-content: center; }
+        .pin-display { background: #111; padding: 20px; width: 220px; text-align: center; font-size: 35px; letter-spacing: 10px; margin-bottom: 20px; border-radius: 15px; border: 2px solid var(--orange); color: var(--orange); height: 50px; display: flex; align-items: center; justify-content: center; }
+        .pin-grid { display: grid; grid-template-columns: repeat(3, 1fr); gap: 15px; }
+        .pin-btn { width: 75px; height: 75px; border-radius: 50%; border: 1px solid #333; background: #111; color: white; font-size: 24px; cursor: pointer; transition: 0.2s; }
+        .pin-btn:active { background: var(--orange); color: black; transform: scale(0.9); }
+
+        .nav-btn { background: none; border: 1px solid transparent; color: #a1a1aa; padding: 14px; margin-bottom: 5px; border-radius: 10px; cursor: pointer; text-align: left; font-size: 13px; font-weight: 600; width: 100%; transition: 0.3s; }
+        .nav-btn:hover { background: rgba(255,255,255,0.1); color: white; }
+        .nav-btn.active { background: var(--orange); color: black; }
+        
+        .main-content { flex: 1; display: flex; overflow: hidden; }
+        .pos-section { flex: 1; display: flex; flex-direction: column; padding: 15px; overflow-y: auto; background: var(--bg); }
+        
+        .cart-section { width: 320px; background: #0f0f0f; border-left: 1px solid #222; padding: 20px; display: flex; flex-direction: column; }
+
+        .search-container { margin-bottom: 15px; position: sticky; top: 0; z-index: 10; background: var(--bg); padding-bottom: 10px; }
+        .search-input { width: 100%; padding: 15px; border-radius: 12px; border: 1px solid #333; background: #111; color: white; font-size: 16px; outline: none; transition: 0.3s; }
+        .search-input:focus { border-color: var(--orange); box-shadow: 0 0 10px rgba(243, 156, 18, 0.2); }
+
+        .grid { display: grid; grid-template-columns: repeat(auto-fill, minmax(130px, 1fr)); gap: 12px; }
+        .item-btn { 
+            background: #fff; color: #000; padding: 12px; border-radius: 15px; border: none; 
+            height: 110px; cursor: pointer; font-weight: 800; font-size: 11px; 
+            display: flex; flex-direction: column; justify-content: center; align-items: center;
+            position: relative; transition: 0.2s; 
+        }
+        .item-btn:active { transform: scale(0.95); }
+        .stock-tag { position: absolute; top: 8px; right: 8px; background: #000; color: #fff; padding: 2px 6px; border-radius: 6px; font-size: 10px; }
+        .low-stock { border: 3px solid var(--red) !important; }
+
+        /* ADMIN FORM BOXES */
+        .form-box { background: var(--admin-blue); padding: 20px; border-radius: 15px; border: 1px solid var(--admin-border); margin-bottom: 20px; }
+        input, select { background: #1a1a1a; color: white; border: 1px solid #333; padding: 12px; border-radius: 8px; margin-bottom: 10px; width: 100%; box-sizing: border-box; }
+        
+        table { width: 100%; border-collapse: collapse; font-size: 14px; }
+        th { color: #8892b0; text-transform: uppercase; font-size: 11px; padding: 10px; text-align: left; border-bottom: 1px solid var(--admin-border); }
+        td { padding: 12px 10px; border-bottom: 1px solid rgba(255,255,255,0.05); }
+
         .page-content { display: none; }
-        .page-content.active { display: block; }
+        .page-content.active { display: block; animation: fadeIn 0.3s; }
+        @keyframes fadeIn { from { opacity: 0; } to { opacity: 1; } }
+
+        .btn-confirm { background: var(--orange); color: black; border: none; padding: 18px; border-radius: 12px; font-weight: 900; width: 100%; cursor: pointer; font-size: 16px; margin-top: auto; }
+        .text-green-500 { color: #2ecc71 !important; }
+        .text-red-400 { color: #ff7675 !important; }
+        .text-blue-400 { color: #74b9ff !important; }
     </style>
 </head>
 <body>
 
+<audio id="sound-click" src="https://assets.mixkit.co/active_storage/sfx/2571/2571-preview.mp3"></audio>
+<audio id="sound-success" src="https://assets.mixkit.co/active_storage/sfx/2013/2013-preview.mp3"></audio>
+
 <div id="login-overlay">
-    <h2 style="color:var(--orange)">OJOO AMISTY LOUNGE</h2>
+    <h1 style="color:var(--orange); letter-spacing: 2px; margin-bottom: 5px;">OJOO AMISTY</h1>
+    <p style="color:#555; margin-bottom: 30px; font-weight: bold;">LOUNGE POS PRO</p>
     <div class="pin-display" id="pin-view">****</div>
     <div class="pin-grid" id="numpad"></div>
 </div>
 
 <div class="sidebar">
-    <div style="margin-bottom: 20px; font-size: 11px; color: #555;">STAFF: <span id="user-ui" style="color:var(--orange)">...</span></div>
-    <button onclick="showPage('sales-page')" class="nav-btn active">POS TERMINAL</button>
-    <button onclick="showPage('surplus-page')" class="nav-btn">RECORD SURPLUS</button>
-    <button onclick="showPage('expenses-page')" class="nav-btn">EXPENSES</button>
-    
-    <div id="admin-menu" class="admin-only">
-        <hr style="border:0; border-top:1px solid #222; margin:15px 0;">
-        <button onclick="showPage('stock-page')" class="nav-btn">STOCK & PRICES</button>
-        <button onclick="showPage('add-drink-page')" class="nav-btn">ADD NEW DRINK</button>
-        <button onclick="showPage('staff-page')" class="nav-btn">STAFF MANAGER</button>
-        <button onclick="showPage('reports-page')" class="nav-btn">REPORTS</button>
+    <div style="margin-bottom: 25px; padding: 10px;">
+        <div style="font-size: 10px; color: #8892b0; letter-spacing: 1px;">OPERATOR</div>
+        <div id="user-ui" style="font-size: 18px; font-weight: 900; color:white">...</div>
     </div>
+    
+    <nav>
+        <button onclick="showPage('sales-page', this)" class="nav-btn active">🛒 POS TERMINAL</button>
+        <button onclick="showPage('surplus-page', this)" class="nav-btn">💰 SURPLUS / PROMO</button>
+        <button onclick="showPage('expenses-page', this)" class="nav-btn">💸 DAILY EXPENSES</button>
+        
+        <div id="admin-menu" style="display:none; margin-top: 20px;">
+            <div style="font-size: 10px; color: #4e5d7e; margin-bottom: 10px; padding-left: 10px;">MANAGEMENT</div>
+            <button onclick="showPage('stock-page', this)" class="nav-btn">📦 STOCK & PRICES</button>
+            <button onclick="showPage('add-drink-page', this)" class="nav-btn">➕ ADD NEW DRINK</button>
+            <button onclick="showPage('staff-page', this)" class="nav-btn">👥 STAFF MANAGER</button>
+            <button onclick="showPage('reports-page', this); renderHistory();" class="nav-btn">📊 FINANCIAL REPORTS</button>
+        </div>
+    </nav>
+    <div style="margin-top: auto; padding: 10px; font-size: 10px; color: #4e5d7e;">v2.5 YEARLY PRO</div>
 </div>
 
 <div class="main-content">
     <div class="pos-section">
         <div id="sales-page" class="page-content active">
-            <div id="cat-tabs-ui" style="margin-bottom:15px; display:flex; gap:5px; overflow-x:auto;"></div>
+            <div class="search-container">
+                <input type="text" id="pos-search" class="search-input" placeholder="🔍 Search drink to sell..." oninput="render()">
+            </div>
+            <div id="cat-tabs-ui" style="margin-bottom:20px; display:flex; gap:8px; overflow-x:auto; padding-bottom: 5px;"></div>
             <div id="item-grid" class="grid"></div>
         </div>
 
         <div id="stock-page" class="page-content">
-            <h3>Update Prices & Stock</h3>
-            <table>
-                <thead><tr><th>Drink Name</th><th>Price (₵)</th><th>Stock</th><th>Action</th></tr></thead>
-                <tbody id="stock-body"></tbody>
-            </table>
+            <h2 style="color:var(--orange)">Inventory & Pricing</h2>
+            <div class="search-container" style="background:transparent;">
+                <input type="text" id="stock-search" class="search-input" placeholder="🔍 Search inventory to edit..." oninput="render()">
+            </div>
+            <div class="form-box">
+                <table>
+                    <thead><tr><th>DRINK (A-Z)</th><th>PRICE (₵)</th><th>STOCK</th><th>ACTION</th></tr></thead>
+                    <tbody id="stock-body"></tbody>
+                </table>
+            </div>
         </div>
 
         <div id="add-drink-page" class="page-content">
-            <h3>Add New Drink</h3>
-            <div class="form-box">
-                <input type="text" id="new-item-name" placeholder="Name (e.g. Heinken)">
-                <input type="number" id="new-item-price" placeholder="Price">
+            <h2>System Entry</h2>
+            <div class="form-box" style="max-width: 400px;">
+                <input type="text" id="new-item-name" placeholder="Drink Name">
+                <input type="number" id="new-item-price" placeholder="Selling Price">
                 <select id="new-item-cat">
                     <option value="Beverages">Beverages</option>
                     <option value="Alcoholic">Alcoholic</option>
@@ -92,50 +138,68 @@
                     <option value="IceCream">Ice Cream</option>
                     <option value="Misc">Misc</option>
                 </select>
-                <button onclick="addNewDrink()" style="background:var(--orange); border:none; padding:12px; width:100%; font-weight:bold; cursor:pointer;">ADD TO SYSTEM</button>
+                <button onclick="addNewDrink()" class="btn-confirm">ADD DRINK</button>
             </div>
         </div>
 
         <div id="staff-page" class="page-content">
-            <h3>Staff List</h3>
-            <div class="form-box">
-                <input type="text" id="s-name" placeholder="Staff Name">
-                <input type="number" id="s-pin" placeholder="PIN Code">
-                <button onclick="addStaff()" style="background:var(--orange); border:none; padding:10px; width:100%;">Add New Staff Member</button>
+            <h2>Staff Directory</h2>
+            <div class="form-box" style="max-width: 400px;">
+                <input type="text" id="s-name" placeholder="Full Name">
+                <input type="number" id="s-pin" placeholder="Assign PIN">
+                <button onclick="addStaff()" style="background:var(--green); border:none; padding:12px; width:100%; border-radius:8px; font-weight:bold; cursor:pointer;">CREATE STAFF</button>
             </div>
-            <table><tbody id="staff-body"></tbody></table>
+            <div class="form-box"><table><tbody id="staff-body"></tbody></table></div>
         </div>
 
         <div id="reports-page" class="page-content">
-            <h3>Admin Financials</h3>
-            <div id="admin-totals" style="background:#111; padding:20px; border-radius:10px; border:1px solid #333;"></div>
-            <button onclick="exportToExcel()" style="background:#2ecc71; color:white; padding:15px; border:none; width:100%; cursor:pointer; margin-top:10px; font-weight:bold;">DOWNLOAD EXCEL</button>
-            <button onclick="resetDay()" style="color:red; background:none; border:1px solid red; margin-top:20px; padding:8px; cursor:pointer;">RESET ALL</button>
+            <h2>Financial Overview</h2>
+            <div id="admin-totals" style="display:grid; grid-template-columns: 1fr 1fr; gap:15px; margin-bottom:20px;"></div>
+            <button onclick="exportToExcel()" style="background:#2ecc71; color:white; padding:18px; border:none; width:100%; cursor:pointer; border-radius:12px; font-weight:bold;">💾 DOWNLOAD EXCEL</button>
+            
+            <div class="form-box" style="margin-top: 30px;">
+                <h3 style="color:var(--orange)">365-Day Performance History</h3>
+                <div style="max-height: 400px; overflow-y: auto;">
+                    <table>
+                        <thead><tr><th>DATE</th><th>SALES</th><th>EXPENSES</th><th>NET</th></tr></thead>
+                        <tbody id="history-body"></tbody>
+                    </table>
+                </div>
+            </div>
+
+            <div style="margin-top: 40px; border-top: 1px solid #222; padding-top: 20px;">
+                <button onclick="resetDay()" style="color:var(--red); background:none; border:1px solid var(--red); padding:10px 20px; border-radius:8px; cursor:pointer;">⚠️ CLOSE DAY & ARCHIVE</button>
+            </div>
         </div>
 
         <div id="expenses-page" class="page-content">
-            <h3>Daily Expenses</h3>
-            <input type="text" id="exp-n" placeholder="Reason"> <input type="number" id="exp-a" placeholder="Amt">
-            <button onclick="addExp()" style="background:var(--orange); border:none; padding:10px; cursor:pointer;">Save</button>
-            <table style="margin-top:20px;"><tbody id="exp-history"></tbody></table>
+            <h2>Record Expense</h2>
+            <div class="form-box" style="max-width:400px;">
+                <input type="text" id="exp-n" placeholder="Reason"> 
+                <input type="number" id="exp-a" placeholder="Amount">
+                <button onclick="addExp()" class="btn-confirm">SAVE EXPENSE</button>
+            </div>
+            <div class="form-box"><table style="margin-top:20px;"><tbody id="exp-history"></tbody></table></div>
         </div>
 
         <div id="surplus-page" class="page-content">
-            <h3>Surplus/Promo</h3>
-            <input type="text" id="sur-n" placeholder="Reason"> <input type="number" id="sur-a" placeholder="Amt">
-            <button onclick="addSurplus()" style="background:#2ecc71; border:none; padding:10px; cursor:pointer;">Save</button>
-            <table style="margin-top:20px;"><tbody id="sur-history"></tbody></table>
+            <h2>Surplus / Extra Cash</h2>
+            <div class="form-box" style="max-width:400px;">
+                <input type="text" id="sur-n" placeholder="Source"> 
+                <input type="number" id="sur-a" placeholder="Amount">
+                <button onclick="addSurplus()" class="btn-confirm" style="background:var(--green)">SAVE SURPLUS</button>
+            </div>
+            <div class="form-box"><table style="margin-top:20px;"><tbody id="sur-history"></tbody></table></div>
         </div>
     </div>
 
     <div class="cart-section">
-        <h3 style="color:var(--orange); margin-top:0;">Cart Summary</h3>
-        <div id="cart-items" style="flex:1; overflow-y:auto; font-size:14px;"></div>
-        <hr style="border:0; border-top:1px solid #333; margin:15px 0;">
-        <div style="font-size:20px; font-weight:bold; display:flex; justify-content:space-between;">
-            <span>Total:</span><span id="cart-total">₵0.00</span>
+        <h2 style="color:var(--orange); margin: 0 0 20px 0; font-size: 18px;">Order Details</h2>
+        <div id="cart-items" style="flex:1; overflow-y:auto; border-bottom: 1px solid #222;"></div>
+        <div style="padding: 20px 0;">
+            <div style="font-size:32px; font-weight:900; color:var(--orange);" id="cart-total">₵0.00</div>
         </div>
-        <button onclick="checkout()" style="background:var(--orange); border:none; padding:15px; font-weight:bold; margin-top:15px; cursor:pointer; border-radius:8px; width:100%;">CONFIRM SALE</button>
+        <button onclick="checkout()" class="btn-confirm">CONFIRM TRANSACTION</button>
     </div>
 </div>
 
@@ -145,83 +209,139 @@
     const db = firebase.database();
 
     let typedPin = "", currentUser = "", isAdmin = false, cart = [];
-    let staffList = [{name:"Master", pin:"1012"}, {name:"Ako", pin:"3026"}, {name:"Essin", pin:"4321"}];
+    let staffList = [];
     let inventory = [], salesTotal = 0, expenses = [], surplusEntries = [];
 
-    // Numpad Setup
+    const playSound = (id) => { const s = document.getElementById(id); if(s) {s.currentTime = 0; s.play();} };
+
+    // NUMPAD LOGIC
     const pad = document.getElementById('numpad');
     [1,2,3,4,5,6,7,8,9,'C',0,'OK'].forEach(k => {
         const b = document.createElement('button'); b.className = 'pin-btn'; b.innerText = k;
-        if(k==='C') b.onclick = () => { typedPin = ""; updatePinView(); };
+        if(k==='C') b.onclick = () => { typedPin = ""; updatePinView(); playSound('sound-click'); };
         else if(k==='OK') b.onclick = checkPin;
-        else b.onclick = () => { typedPin += k; updatePinView(); };
+        else b.onclick = () => { typedPin += k; updatePinView(); playSound('sound-click'); };
         pad.appendChild(b);
     });
+
     function updatePinView() { document.getElementById('pin-view').innerText = "*".repeat(typedPin.length) || "****"; }
 
     function checkPin() {
         const found = staffList.find(s => s.pin === typedPin);
         if (found) {
-            currentUser = found.name; isAdmin = (found.pin === "1012");
+            currentUser = found.name; 
+            isAdmin = (found.pin === "1012");
             document.getElementById('user-ui').innerText = currentUser;
             document.getElementById('login-overlay').style.display='none';
             if(isAdmin) document.getElementById('admin-menu').style.display='block';
-            startSync();
-        } else { alert("Wrong PIN"); typedPin = ""; updatePinView(); }
+            playSound('sound-success');
+        } else { alert("⚠️ Invalid PIN"); typedPin = ""; updatePinView(); }
     }
 
-    function startSync() {
-        db.ref('ojoo_final').on('value', (s) => {
-            const data = s.val() || {};
-            inventory = data.inventory || [];
-            salesTotal = data.salesTotal || 0;
-            expenses = data.expenses || [];
-            surplusEntries = data.surplusEntries || [];
-            staffList = data.staffList || staffList;
-            render();
-        });
-    }
+    db.ref('ojoo_final').on('value', (s) => {
+        const data = s.val() || {};
+        inventory = data.inventory || [];
+        salesTotal = data.salesTotal || 0;
+        expenses = data.expenses || [];
+        surplusEntries = data.surplusEntries || [];
+        staffList = data.staffList || [{name:"Master", pin:"1012"}];
+        render();
+    });
 
     function render() {
         const cats = ["ALL", "Beverages", "Alcoholic", "Sachets", "IceCream", "Misc"];
         const curCat = window.selCat || "ALL";
-        document.getElementById('cat-tabs-ui').innerHTML = cats.map(c => `<button onclick="window.selCat='${c}';render()" class="nav-btn ${curCat===c?'active':''}" style="width:auto; padding:8px 15px;">${c}</button>`).join('');
+        const posSearchTerm = document.getElementById('pos-search').value.toLowerCase();
+        const stockSearchTerm = document.getElementById('stock-search').value.toLowerCase();
 
-        const filtered = curCat === "ALL" ? inventory : inventory.filter(i => i.cat === curCat);
-        document.getElementById('item-grid').innerHTML = filtered.map(i => `<button class="item-btn" onclick="addToCart(${i.id})"><span class="stock-tag">${i.stock}</span>${i.name}<br>₵${(i.price || 0).toFixed(2)}</button>`).join('');
+        // 1. GLOBAL ALPHABETICAL SORT (A-Z)
+        inventory.sort((a, b) => a.name.localeCompare(b.name));
 
+        // Filter for POS
+        let posFiltered = [...inventory];
+        if (curCat !== "ALL") posFiltered = posFiltered.filter(i => i.cat === curCat);
+        if (posSearchTerm) posFiltered = posFiltered.filter(i => i.name.toLowerCase().includes(posSearchTerm));
+
+        // Filter for Stock Management
+        let stockFiltered = [...inventory];
+        if (stockSearchTerm) stockFiltered = stockFiltered.filter(i => i.name.toLowerCase().includes(stockSearchTerm));
+
+        // Render Tabs
+        document.getElementById('cat-tabs-ui').innerHTML = cats.map(c => `<button onclick="window.selCat='${c}';render()" class="nav-btn ${curCat===c?'active':''}" style="width:auto; padding:10px 20px; border: 1px solid #222;">${c}</button>`).join('');
+
+        // Render Product Grid (POS)
+        document.getElementById('item-grid').innerHTML = posFiltered.map(i => `<button class="item-btn ${i.stock < 5 ? 'low-stock' : ''}" onclick="addToCart(${i.id})"><span class="stock-tag">${i.stock}</span><span style="font-size:14px">${i.name}</span><span style="color:var(--orange)">₵${(i.price || 0).toFixed(2)}</span></button>`).join('');
+
+        // Render Cart
         let cTotal = 0;
         document.getElementById('cart-items').innerHTML = cart.map((item, idx) => {
             cTotal += item.price;
-            return `<div style="display:flex; justify-content:space-between; padding:5px 0;"><span>${item.name}</span><span>₵${item.price.toFixed(2)} <button onclick="removeFromCart(${idx})" style="color:red; background:none; border:none; cursor:pointer;">Undo</button></span></div>`;
+            return `<div style="display:flex; justify-content:space-between; padding:12px 0; border-bottom:1px solid #111;"><span>${item.name}</span><button onclick="removeFromCart(${idx})" style="color:var(--red); background:none; border:none;">REMOVE</button></div>`;
         }).join('');
         document.getElementById('cart-total').innerText = "₵" + cTotal.toFixed(2);
 
         if(isAdmin) {
-            document.getElementById('stock-body').innerHTML = inventory.map(i => `<tr><td>${i.name}</td><td><input type="number" value="${i.price}" onchange="updItem(${i.id},'price',this.value)"></td><td><input type="number" value="${i.stock}" onchange="updItem(${i.id},'stock',this.value)"></td><td><button onclick="delItem(${i.id})" style="color:red; background:none; border:none;">X</button></td></tr>`).join('');
-            document.getElementById('staff-body').innerHTML = staffList.map((s, idx) => `<tr><td>${s.name}</td><td>${s.pin}</td><td><button onclick="removeStaff(${idx})" style="color:red; background:none; border:none;">Del</button></td></tr>`).join('');
-            const surTotal = surplusEntries.reduce((a,b)=>a+parseFloat(b.amount),0);
-            const expTotal = expenses.reduce((a,b)=>a+parseFloat(b.amount),0);
-            document.getElementById('admin-totals').innerHTML = `<p>Sales: ₵${salesTotal.toFixed(2)}</p><p>Surplus: ₵${surTotal.toFixed(2)}</p><p>Expenses: ₵${expTotal.toFixed(2)}</p><h3>Cash In Drawer: ₵${(salesTotal+surTotal-expTotal).toFixed(2)}</h3>`;
+            // Render Stock Body with SEARCH results
+            document.getElementById('stock-body').innerHTML = stockFiltered.map(i => `<tr><td><b>${i.name}</b></td><td><input type="number" value="${i.price}" onchange="updItem(${i.id},'price',this.value)"></td><td><input type="number" value="${i.stock}" onchange="updItem(${i.id},'stock',this.value)"></td><td><button onclick="delItem(${i.id})" style="color:var(--red); background:none; border:none;">X</button></td></tr>`).join('');
+            
+            document.getElementById('staff-body').innerHTML = staffList.map((s, idx) => `<tr><td>${s.name}</td><td>${s.pin}</td><td><button onclick="removeStaff(${idx})" style="color:var(--red); border:none; background:none;">Del</button></td></tr>`).join('');
+
+            const surT = surplusEntries.reduce((a,b)=>a+parseFloat(b.amount || 0),0);
+            const expT = expenses.reduce((a,b)=>a+parseFloat(b.amount || 0),0);
+            document.getElementById('admin-totals').innerHTML = `<div class="form-box">SALES: ₵${salesTotal.toFixed(2)}</div><div class="form-box">NET CASH: ₵${(salesTotal+surT-expT).toFixed(2)}</div>`;
         }
         document.getElementById('exp-history').innerHTML = expenses.map(e => `<tr><td>${e.name}</td><td>₵${e.amount}</td></tr>`).join('');
         document.getElementById('sur-history').innerHTML = surplusEntries.map(s => `<tr><td>${s.note}</td><td>₵${s.amount}</td></tr>`).join('');
     }
 
-    function addToCart(id) { cart.push({...inventory.find(i => i.id === id)}); render(); }
+    // FUNCTIONS
+    function addToCart(id) { const item = inventory.find(i => i.id === id); if(item.stock <= 0) return alert("Out of Stock!"); cart.push({...item}); playSound('sound-click'); render(); }
     function removeFromCart(idx) { cart.splice(idx, 1); render(); }
-    function checkout() { if(cart.length === 0) return; cart.forEach(c => { const i = inventory.find(x => x.id === c.id); i.stock -= 1; salesTotal += i.price; }); cart = []; save(); alert("Success!"); }
+    function checkout() { if(cart.length === 0) return; cart.forEach(c => { const i = inventory.find(x => x.id === c.id); i.stock -= 1; salesTotal += i.price; }); cart = []; save(); playSound('sound-success'); alert("✅ Success!"); }
     function updItem(id, f, v) { inventory.find(i => i.id === id)[f] = parseFloat(v); save(); }
-    function addNewDrink() { const n = document.getElementById('new-item-name').value, p = document.getElementById('new-item-price').value, c = document.getElementById('new-item-cat').value; if(n&&p){ inventory.push({id: Date.now(), name: n, price: parseFloat(p), cat: c, stock: 100}); save(); alert("Added!"); }}
-    function delItem(id) { if(confirm("Delete Drink?")) { inventory = inventory.filter(i => i.id !== id); save(); }}
-    function addStaff() { const n = document.getElementById('s-name').value, p = document.getElementById('s-pin').value; if(n&&p){ staffList.push({name:n, pin:p}); save(); }}
-    function removeStaff(idx) { if(confirm("Delete Staff?")) { staffList.splice(idx, 1); save(); }}
-    function addExp() { const n=document.getElementById('exp-n').value, a=document.getElementById('exp-a').value; if(n&&a){expenses.push({name:n, amount:a}); save();}}
-    function addSurplus() { const n=document.getElementById('sur-n').value, a=document.getElementById('sur-a').value; if(n&&a){surplusEntries.push({note:n, amount:a}); save();}}
+    function addNewDrink() { const n=document.getElementById('new-item-name').value, p=document.getElementById('new-item-price').value, c=document.getElementById('new-item-cat').value; if(n&&p){ inventory.push({id:Date.now(), name:n, price:parseFloat(p), cat:c, stock:24}); save(); alert("Added!"); }}
+    function delItem(id) { if(confirm("Delete?")) { inventory = inventory.filter(i => i.id !== id); save(); }}
+    function addStaff() { const n=document.getElementById('s-name').value, p=document.getElementById('s-pin').value; if(n&&p){ staffList.push({name:n, pin:p}); save(); }}
+    function removeStaff(idx) { staffList.splice(idx, 1); save(); }
+    function addExp() { const n=document.getElementById('exp-n').value, a=document.getElementById('exp-a').value; if(n&&a){ expenses.push({name:n, amount:a, user:currentUser}); save(); }}
+    function addSurplus() { const n=document.getElementById('sur-n').value, a=document.getElementById('sur-a').value; if(n&&a){ surplusEntries.push({note:n, amount:a}); save(); }}
     function save() { db.ref('ojoo_final').set({inventory, salesTotal, expenses, surplusEntries, staffList}); }
-    function showPage(p) { document.querySelectorAll('.page-content').forEach(c => c.classList.remove('active')); document.getElementById(p).classList.add('active'); document.querySelectorAll('.nav-btn').forEach(b => b.classList.remove('active')); event.target.classList.add('active'); }
-    function resetDay() { if(confirm("Reset?")){ salesTotal=0; expenses=[]; surplusEntries=[]; save(); }}
-    function exportToExcel() { let data = [["Ojoo Report"],["Sales", salesTotal],["Expenses", expenses.reduce((a,b)=>a+parseFloat(b.amount),0)]]; let ws = XLSX.utils.aoa_to_sheet(data); let wb = XLSX.utils.book_new(); XLSX.utils.book_append_sheet(wb, ws, "Report"); XLSX.writeFile(wb, "Ojoo_Report.xlsx"); }
+
+    function showPage(p, btn) { 
+        document.querySelectorAll('.page-content').forEach(c => c.classList.remove('active')); 
+        document.getElementById(p).classList.add('active'); 
+        document.querySelectorAll('.nav-btn').forEach(b => b.classList.remove('active')); 
+        if(btn) btn.classList.add('active');
+    }
+
+    // 365 DAY WINDOW
+    function renderHistory() {
+        db.ref('ojoo_history').limitToLast(365).once('value', (s) => {
+            const data = s.val() || {};
+            let html = "";
+            Object.keys(data).sort((a,b) => b.localeCompare(a)).forEach(date => {
+                const day = data[date];
+                html += `<tr><td>${date}</td><td class="text-green-500">₵${(day.total || 0).toFixed(2)}</td><td class="text-red-400">₵${(day.expenses || 0).toFixed(2)}</td><td class="text-blue-400">₵${(day.net || 0).toFixed(2)}</td></tr>`;
+            });
+            document.getElementById('history-body').innerHTML = html;
+        });
+    }
+
+    function resetDay() {
+        if(confirm("Archive today's sales and start a new day?")){ 
+            const date = new Date().toLocaleDateString().replace(/\//g, '-');
+            const surT = surplusEntries.reduce((a,b)=>a+parseFloat(b.amount || 0),0);
+            const expT = expenses.reduce((a,b)=>a+parseFloat(b.amount || 0),0);
+            db.ref('ojoo_history/' + date).set({ total: salesTotal, expenses: expT, surplus: surT, net: (salesTotal + surT - expT), timestamp: Date.now() });
+            salesTotal = 0; expenses = []; surplusEntries = []; save(); alert("Day Archived!"); renderHistory();
+        } 
+    }
+
+    function exportToExcel() { 
+        let data = [["OJOO REPORT"],["Date", new Date().toLocaleDateString()],["Sales", salesTotal]]; 
+        let ws = XLSX.utils.aoa_to_sheet(data); let wb = XLSX.utils.book_new(); 
+        XLSX.utils.book_append_sheet(wb, ws, "Financials"); XLSX.writeFile(wb, `Report.xlsx`); 
+    }
 </script>
 </body>
 </html>
