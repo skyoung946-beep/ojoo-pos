@@ -1504,6 +1504,70 @@
             transform: translateY(-2px);
         }
 
+        /* Audit History */
+        .audit-history-item {
+            background-color: var(--bg-tertiary);
+            border-radius: 12px;
+            padding: 16px;
+            margin-bottom: 12px;
+            border: 1px solid var(--border);
+            cursor: pointer;
+            transition: all 0.2s;
+        }
+
+        .audit-history-item:hover {
+            border-color: var(--accent-primary);
+            transform: translateX(4px);
+        }
+
+        .audit-history-header {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            margin-bottom: 8px;
+        }
+
+        .audit-history-date {
+            font-size: 16px;
+            font-weight: 600;
+            color: var(--accent-primary);
+        }
+
+        .audit-history-time {
+            color: var(--text-secondary);
+            font-size: 14px;
+        }
+
+        .audit-history-stats {
+            display: flex;
+            gap: 20px;
+            margin-top: 8px;
+            flex-wrap: wrap;
+        }
+
+        .audit-history-stat {
+            display: flex;
+            align-items: center;
+            gap: 6px;
+        }
+
+        .audit-history-label {
+            color: var(--text-secondary);
+            font-size: 12px;
+        }
+
+        .audit-history-value {
+            font-weight: 600;
+        }
+
+        .audit-history-value.loss {
+            color: var(--danger);
+        }
+
+        .audit-history-value.success {
+            color: var(--success);
+        }
+
         /* Total Loss Card */
         .total-loss-card {
             background: linear-gradient(135deg, rgba(239, 68, 68, 0.1), rgba(239, 68, 68, 0.2));
@@ -1864,6 +1928,52 @@
         .theme-blue {
             background: #1e3a8a;
             color: white;
+        }
+
+        /* Toggle Switch */
+        .toggle-switch {
+            position: relative;
+            display: inline-block;
+            width: 50px;
+            height: 24px;
+        }
+
+        .toggle-switch input {
+            opacity: 0;
+            width: 0;
+            height: 0;
+        }
+
+        .toggle-slider {
+            position: absolute;
+            cursor: pointer;
+            top: 0;
+            left: 0;
+            right: 0;
+            bottom: 0;
+            background-color: var(--bg-tertiary);
+            transition: .4s;
+            border-radius: 24px;
+        }
+
+        .toggle-slider:before {
+            position: absolute;
+            content: "";
+            height: 20px;
+            width: 20px;
+            left: 2px;
+            bottom: 2px;
+            background-color: var(--text-primary);
+            transition: .4s;
+            border-radius: 50%;
+        }
+
+        input:checked + .toggle-slider {
+            background-color: var(--accent-primary);
+        }
+
+        input:checked + .toggle-slider:before {
+            transform: translateX(26px);
         }
 
         /* Scrollbar Styling */
@@ -2328,7 +2438,7 @@
             <h2 style="margin-bottom: 24px;">Start Stock Audit</h2>
             <div class="form-group">
                 <label>Audit Date</label>
-                <input type="text" id="auditStartDate" class="date-picker" placeholder="Select date" value="${moment().format('YYYY-MM-DD')}">
+                <input type="text" id="auditStartDate" class="date-picker" placeholder="Select date">
             </div>
             <div class="form-group">
                 <label>Audit Type</label>
@@ -2589,6 +2699,16 @@
             secondary: '#8b5cf6',
             background: '#0a0b0e',
             text: '#ffffff'
+        };
+
+        // Business settings
+        let businessSettings = {
+            enableSound: true,
+            autoSave: true,
+            lowStockAlerts: true,
+            currency: 'GHS',
+            defaultReportPeriod: 'daily',
+            exportFormat: 'csv'
         };
 
         // Paystack configuration
@@ -3159,6 +3279,9 @@
             }
             
             const today = new Date().toISOString().split('T')[0];
+            const now = new Date();
+            const timeStr = now.toLocaleTimeString();
+            const dateTimeStr = now.toLocaleString();
             
             // If damaged or broken, update inventory
             if ((type === 'damage' || type === 'broken') && itemId) {
@@ -3176,7 +3299,8 @@
                 description: description,
                 itemId: itemId || null,
                 staff: currentUser.name,
-                time: new Date().toLocaleTimeString(),
+                time: timeStr,
+                datetime: dateTimeStr,
                 date: today
             };
             
@@ -3385,6 +3509,7 @@
                 const today = new Date().toISOString().split('T')[0];
                 const procurementRecord = {
                     time: new Date().toLocaleTimeString(),
+                    datetime: new Date().toLocaleString(),
                     item: product.name,
                     unitPrice: newCostPrice,
                     qty: quantity,
@@ -3559,6 +3684,10 @@
             db.ref(`${currentShopPath}/inventory`).set(currentShop.inventory);
 
             const today = new Date().toISOString().split('T')[0];
+            const now = new Date();
+            const timeStr = now.toLocaleTimeString();
+            const dateTimeStr = now.toLocaleString();
+            
             const profit = cart.reduce((sum, item) => {
                 return sum + ((item.price - (item.costPrice || 0)) * item.quantity);
             }, 0);
@@ -3573,7 +3702,8 @@
                     qty: item.quantity,
                     price: item.price
                 })),
-                time: new Date().toLocaleTimeString()
+                time: timeStr,
+                datetime: dateTimeStr
             };
             
             db.ref(`reports/${currentShop.id}/${today}/sales`).push(saleRecord).then(() => {
@@ -3582,7 +3712,7 @@
                 
                 const newTransaction = {
                     id: paymentDetails.reference.substring(0, 8),
-                    date: today + ' ' + new Date().toLocaleTimeString(),
+                    date: dateTimeStr,
                     customer: 'Walk-in Customer',
                     items: cart.length,
                     total: paymentDetails.amount,
@@ -3716,14 +3846,21 @@
                 return sum;
             }, 0);
             
+            const now = new Date();
+            const timeStr = now.toLocaleTimeString();
+            const dateTimeStr = now.toLocaleString();
+            
             const auditRecord = {
-                id: auditRecords.length + 1,
+                id: Date.now(),
                 date: currentAudit.date,
+                time: timeStr,
+                datetime: dateTimeStr,
                 type: currentAudit.type,
                 status: 'Completed',
                 discrepancies: discrepancies,
                 accuracy: accuracy,
                 totalLoss: totalLoss,
+                assignee: currentAudit.assignee,
                 items: currentAudit.items.map(item => {
                     const product = currentShop.inventory.find(p => p.id === item.id);
                     const diff = item.physicalStock - item.systemStock;
@@ -3743,23 +3880,28 @@
             
             const auditDate = currentAudit.date;
             db.ref(`reports/${currentShop.id}/${auditDate}/stock_audits`).push({
-                time: new Date().toLocaleTimeString(),
+                time: timeStr,
+                datetime: dateTimeStr,
                 staff: currentUser ? currentUser.name : 'Admin',
-                totalVariance: `GHS ${totalLoss.toFixed(2)}`,
+                totalLoss: totalLoss.toFixed(2),
+                discrepancies: discrepancies,
+                accuracy: accuracy,
+                type: currentAudit.type,
                 details: auditRecord.items
-            });
-            
-            currentAudit.items.forEach(item => {
-                const product = currentShop.inventory.find(p => p.id === item.id);
-                if (product) {
-                    product.stock = item.physicalStock;
-                }
-            });
-            
-            db.ref(`${currentShopPath}/inventory`).set(currentShop.inventory).then(() => {
-                currentAudit = null;
-                renderMainContent();
-                alert(`Audit saved successfully!\nTotal Loss: GHS ${totalLoss.toFixed(2)}`);
+            }).then(() => {
+                // Update inventory with physical counts
+                currentAudit.items.forEach(item => {
+                    const product = currentShop.inventory.find(p => p.id === item.id);
+                    if (product) {
+                        product.stock = item.physicalStock;
+                    }
+                });
+                
+                db.ref(`${currentShopPath}/inventory`).set(currentShop.inventory).then(() => {
+                    currentAudit = null;
+                    renderMainContent();
+                    alert(`Audit saved successfully!\nTotal Loss: GHS ${totalLoss.toFixed(2)}`);
+                });
             });
         }
 
@@ -3770,51 +3912,122 @@
             }
         }
 
-        function viewAuditDetails(auditId) {
-            const audit = auditRecords.find(a => a.id === auditId);
-            if (audit) {
-                viewingAuditId = auditId;
+        function loadAuditHistory() {
+            if (!currentShop) return;
+            
+            const auditDate = document.getElementById('auditHistoryDate')?.value || moment().format('YYYY-MM-DD');
+            
+            db.ref(`reports/${currentShop.id}/${auditDate}/stock_audits`).once('value', (snapshot) => {
+                const audits = snapshot.val() || {};
+                const auditList = document.getElementById('auditHistoryList');
                 
-                let itemsHtml = '';
-                audit.items.forEach(item => {
-                    const statusClass = item.difference === 0 ? 'discrepancy-none' : (item.difference > 0 ? 'discrepancy-low' : 'discrepancy-high');
-                    const statusBadge = item.difference === 0 ? 'badge-success' : (item.difference > 0 ? 'badge-warning' : 'badge-danger');
-                    const statusText = item.difference === 0 ? '✓ Match' : (item.difference > 0 ? '↑ Over' : '↓ Under');
-                    
-                    itemsHtml += `
-                        <div class="audit-row">
-                            <div>${item.name}</div>
-                            <div>${item.systemStock}</div>
-                            <div>${item.physicalStock}</div>
-                            <div class="${statusClass}">${item.difference > 0 ? '+' : ''}${item.difference}</div>
-                            <div style="color: var(--danger);">${item.lossValue > 0 ? 'GHS ' + item.lossValue.toFixed(2) : '-'}</div>
-                            <div><span class="badge ${statusBadge}">${statusText}</span></div>
+                if (!auditList) return;
+                
+                if (Object.keys(audits).length === 0) {
+                    auditList.innerHTML = '<div style="text-align: center; padding: 40px; color: var(--text-secondary);">No audits found for this date</div>';
+                    return;
+                }
+                
+                let html = '';
+                Object.entries(audits).forEach(([key, audit]) => {
+                    const lossValue = parseFloat(audit.totalLoss) || 0;
+                    html += `
+                        <div class="audit-history-item" onclick="viewAuditDetails('${key}')">
+                            <div class="audit-history-header">
+                                <span class="audit-history-date">${auditDate}</span>
+                                <span class="audit-history-time">${audit.time || ''}</span>
+                            </div>
+                            <div class="audit-history-stats">
+                                <div class="audit-history-stat">
+                                    <span class="audit-history-label">Type:</span>
+                                    <span class="audit-history-value">${audit.type || 'full'}</span>
+                                </div>
+                                <div class="audit-history-stat">
+                                    <span class="audit-history-label">Discrepancies:</span>
+                                    <span class="audit-history-value ${audit.discrepancies > 0 ? 'loss' : 'success'}">${audit.discrepancies || 0}</span>
+                                </div>
+                                <div class="audit-history-stat">
+                                    <span class="audit-history-label">Accuracy:</span>
+                                    <span class="audit-history-value">${audit.accuracy || 0}%</span>
+                                </div>
+                                <div class="audit-history-stat">
+                                    <span class="audit-history-label">Loss:</span>
+                                    <span class="audit-history-value loss">GHS ${lossValue.toFixed(2)}</span>
+                                </div>
+                                <div class="audit-history-stat">
+                                    <span class="audit-history-label">Staff:</span>
+                                    <span class="audit-history-value">${audit.staff || 'Unknown'}</span>
+                                </div>
+                            </div>
                         </div>
                     `;
                 });
+                
+                auditList.innerHTML = html;
+            });
+        }
+
+        function viewAuditDetails(auditKey) {
+            if (!currentShop) return;
+            
+            const auditDate = document.getElementById('auditHistoryDate')?.value || moment().format('YYYY-MM-DD');
+            
+            db.ref(`reports/${currentShop.id}/${auditDate}/stock_audits/${auditKey}`).once('value', (snapshot) => {
+                const audit = snapshot.val();
+                if (!audit) return;
+                
+                viewingAuditId = auditKey;
+                
+                let itemsHtml = '';
+                if (audit.details) {
+                    audit.details.forEach(item => {
+                        const statusClass = item.difference === 0 ? 'discrepancy-none' : (item.difference > 0 ? 'discrepancy-low' : 'discrepancy-high');
+                        const statusBadge = item.difference === 0 ? 'badge-success' : (item.difference > 0 ? 'badge-warning' : 'badge-danger');
+                        const statusText = item.difference === 0 ? '✓ Match' : (item.difference > 0 ? '↑ Over' : '↓ Under');
+                        
+                        itemsHtml += `
+                            <div class="audit-row">
+                                <div>${item.name}</div>
+                                <div>${item.systemStock}</div>
+                                <div>${item.physicalStock}</div>
+                                <div class="${statusClass}">${item.difference > 0 ? '+' : ''}${item.difference}</div>
+                                <div style="color: var(--danger);">${item.lossValue > 0 ? 'GHS ' + item.lossValue.toFixed(2) : '-'}</div>
+                                <div><span class="badge ${statusBadge}">${statusText}</span></div>
+                            </div>
+                        `;
+                    });
+                }
                 
                 document.getElementById('auditDetails').innerHTML = `
                     <div style="margin-bottom: 20px;">
                         <div style="display: grid; grid-template-columns: repeat(2, 1fr); gap: 16px;">
                             <div>
                                 <div style="color: var(--text-secondary);">Audit Date</div>
-                                <div style="font-size: 18px; font-weight: 600;">${audit.date}</div>
+                                <div style="font-size: 18px; font-weight: 600;">${auditDate}</div>
+                            </div>
+                            <div>
+                                <div style="color: var(--text-secondary);">Time</div>
+                                <div style="font-size: 18px; font-weight: 600;">${audit.time || ''}</div>
                             </div>
                             <div>
                                 <div style="color: var(--text-secondary);">Audit Type</div>
-                                <div style="font-size: 18px; font-weight: 600;">${audit.type}</div>
+                                <div style="font-size: 18px; font-weight: 600;">${audit.type || 'full'}</div>
+                            </div>
+                            <div>
+                                <div style="color: var(--text-secondary);">Staff</div>
+                                <div style="font-size: 18px; font-weight: 600;">${audit.staff || 'Unknown'}</div>
                             </div>
                             <div>
                                 <div style="color: var(--text-secondary);">Discrepancies</div>
-                                <div style="font-size: 18px; font-weight: 600; color: ${audit.discrepancies > 0 ? 'var(--warning)' : 'var(--success)'}">${audit.discrepancies}</div>
+                                <div style="font-size: 18px; font-weight: 600; color: ${audit.discrepancies > 0 ? 'var(--warning)' : 'var(--success)'}">${audit.discrepancies || 0}</div>
                             </div>
                             <div>
                                 <div style="color: var(--text-secondary);">Accuracy</div>
-                                <div style="font-size: 18px; font-weight: 600;">${audit.accuracy}%</div>
+                                <div style="font-size: 18px; font-weight: 600;">${audit.accuracy || 0}%</div>
                             </div>
                             <div>
                                 <div style="color: var(--text-secondary);">Total Loss</div>
-                                <div style="font-size: 18px; font-weight: 600; color: var(--danger);">GHS ${(audit.totalLoss || 0).toFixed(2)}</div>
+                                <div style="font-size: 18px; font-weight: 600; color: var(--danger);">GHS ${(parseFloat(audit.totalLoss) || 0).toFixed(2)}</div>
                             </div>
                         </div>
                     </div>
@@ -3832,14 +4045,20 @@
                 `;
                 
                 document.getElementById('viewAuditModal').classList.add('active');
-            }
+            });
         }
 
-        function exportAudit(auditId) {
-            const audit = auditRecords.find(a => a.id === auditId);
-            if (audit) {
+        function exportAuditReport() {
+            if (!viewingAuditId || !currentShop) return;
+            
+            const auditDate = document.getElementById('auditHistoryDate')?.value || moment().format('YYYY-MM-DD');
+            
+            db.ref(`reports/${currentShop.id}/${auditDate}/stock_audits/${viewingAuditId}`).once('value', (snapshot) => {
+                const audit = snapshot.val();
+                if (!audit || !audit.details) return;
+                
                 const headers = ['Product', 'System Stock', 'Physical Stock', 'Difference', 'Loss Value', 'Status'];
-                const rows = audit.items.map(item => {
+                const rows = audit.details.map(item => {
                     const status = item.difference === 0 ? 'Match' : (item.difference > 0 ? 'Over' : 'Under');
                     return [
                         item.name,
@@ -3857,16 +4076,10 @@
                 const url = window.URL.createObjectURL(blob);
                 const a = document.createElement('a');
                 a.href = url;
-                a.download = `audit_${audit.date}_${audit.type}.csv`;
+                a.download = `audit_${auditDate}_${audit.time.replace(/:/g, '-')}.csv`;
                 a.click();
                 window.URL.revokeObjectURL(url);
-            }
-        }
-
-        function exportAuditReport() {
-            if (viewingAuditId) {
-                exportAudit(viewingAuditId);
-            }
+            });
         }
 
         function goBackFromAudit() {
@@ -3899,6 +4112,11 @@
                     maxYear: parseInt(moment().format('YYYY')),
                     locale: {
                         format: 'YYYY-MM-DD'
+                    }
+                }, function(start) {
+                    const inputId = this.element[0].id;
+                    if (inputId === 'auditHistoryDate') {
+                        loadAuditHistory();
                     }
                 });
             }
@@ -4187,6 +4405,9 @@
                     break;
                 case 'audit':
                     content.innerHTML = renderAudit();
+                    setTimeout(() => {
+                        loadAuditHistory();
+                    }, 100);
                     break;
                 case 'staff':
                     content.innerHTML = renderStaff();
@@ -4450,7 +4671,7 @@
                             </small>
                         </div>
 
-                        <button class="btn btn-primary" style="width: 100%; margin-bottom: 12px;" onclick="processPayment()">
+                        <button class="btn btn-primary" style="width: 100%; margin-bottom: 8px;" onclick="processPayment()">
                             Process Payment
                         </button>
                         
@@ -4572,7 +4793,6 @@
                                     <p>No products yet. Click "Add Product" to get started!</p>
                                 </div>` :
                                 currentShop.inventory.map(item => {
-                                    // Fix: Ensure values are numbers before calling toFixed
                                     const costPrice = parseFloat(item.costPrice) || 0;
                                     const price = parseFloat(item.price) || 0;
                                     const stock = parseInt(item.stock) || 0;
@@ -4812,9 +5032,14 @@
                         <h1>Stock Audit - ${currentShop.name}</h1>
                         <p>Compare system stock vs physical count</p>
                     </div>
-                    <button class="btn btn-primary" onclick="showStartAuditModal()">
-                        <i class="fas fa-play"></i> Start New Audit
-                    </button>
+                    <div style="display: flex; gap: 12px;">
+                        <button class="btn btn-primary" onclick="showStartAuditModal()">
+                            <i class="fas fa-play"></i> Start New Audit
+                        </button>
+                        <div class="audit-date-picker" style="width: 200px;">
+                            <input type="text" id="auditHistoryDate" class="date-picker" placeholder="Select date" value="${moment().format('YYYY-MM-DD')}" onchange="loadAuditHistory()">
+                        </div>
+                    </div>
                 </div>
 
                 ${currentAudit ? `
@@ -4893,6 +5118,15 @@
                     </div>
                 </div>
                 ` : ''}
+
+                <div class="card" style="margin-top: 20px;">
+                    <div class="section-header">
+                        <h2>Audit History</h2>
+                    </div>
+                    <div id="auditHistoryList">
+                        <div style="text-align: center; padding: 40px; color: var(--text-secondary);">Select a date to view audits</div>
+                    </div>
+                </div>
             `;
         }
 
@@ -5068,26 +5302,35 @@
                     </div>
 
                     <div class="settings-section">
-                        <h3 class="settings-section-title">⚙️ General Settings</h3>
+                        <h3 class="settings-section-title">⚙️ Business Settings</h3>
                         <div style="display: grid; gap: 16px;">
                             <div style="display: flex; align-items: center; justify-content: space-between;">
                                 <label>Enable Sound Notifications</label>
-                                <input type="checkbox" checked>
+                                <label class="toggle-switch">
+                                    <input type="checkbox" ${businessSettings.enableSound ? 'checked' : ''} onchange="businessSettings.enableSound = this.checked">
+                                    <span class="toggle-slider"></span>
+                                </label>
                             </div>
                             <div style="display: flex; align-items: center; justify-content: space-between;">
                                 <label>Auto-save Transactions</label>
-                                <input type="checkbox" checked>
+                                <label class="toggle-switch">
+                                    <input type="checkbox" ${businessSettings.autoSave ? 'checked' : ''} onchange="businessSettings.autoSave = this.checked">
+                                    <span class="toggle-slider"></span>
+                                </label>
                             </div>
                             <div style="display: flex; align-items: center; justify-content: space-between;">
                                 <label>Show Low Stock Alerts</label>
-                                <input type="checkbox" checked>
+                                <label class="toggle-switch">
+                                    <input type="checkbox" ${businessSettings.lowStockAlerts ? 'checked' : ''} onchange="businessSettings.lowStockAlerts = this.checked">
+                                    <span class="toggle-slider"></span>
+                                </label>
                             </div>
                             <div style="display: flex; align-items: center; justify-content: space-between;">
                                 <label>Default Currency</label>
-                                <select style="padding: 8px; background: var(--bg-tertiary); border: 1px solid var(--border); border-radius: 6px; color: var(--text-primary);">
-                                    <option value="GHS" selected>GHS (₵)</option>
-                                    <option value="USD">USD ($)</option>
-                                    <option value="EUR">EUR (€)</option>
+                                <select style="padding: 8px; background: var(--bg-tertiary); border: 1px solid var(--border); border-radius: 6px; color: var(--text-primary);" onchange="businessSettings.currency = this.value">
+                                    <option value="GHS" ${businessSettings.currency === 'GHS' ? 'selected' : ''}>GHS (₵)</option>
+                                    <option value="USD" ${businessSettings.currency === 'USD' ? 'selected' : ''}>USD ($)</option>
+                                    <option value="EUR" ${businessSettings.currency === 'EUR' ? 'selected' : ''}>EUR (€)</option>
                                 </select>
                             </div>
                         </div>
@@ -5098,19 +5341,18 @@
                         <div style="display: grid; gap: 16px;">
                             <div style="display: flex; align-items: center; justify-content: space-between;">
                                 <label>Default Report Period</label>
-                                <select style="padding: 8px; background: var(--bg-tertiary); border: 1px solid var(--border); border-radius: 6px; color: var(--text-primary);">
-                                    <option value="daily" selected>Daily</option>
-                                    <option value="weekly">Weekly</option>
-                                    <option value="monthly">Monthly</option>
-                                    <option value="yearly">Yearly</option>
+                                <select style="padding: 8px; background: var(--bg-tertiary); border: 1px solid var(--border); border-radius: 6px; color: var(--text-primary);" onchange="businessSettings.defaultReportPeriod = this.value">
+                                    <option value="daily" ${businessSettings.defaultReportPeriod === 'daily' ? 'selected' : ''}>Daily</option>
+                                    <option value="weekly" ${businessSettings.defaultReportPeriod === 'weekly' ? 'selected' : ''}>Weekly</option>
+                                    <option value="monthly" ${businessSettings.defaultReportPeriod === 'monthly' ? 'selected' : ''}>Monthly</option>
+                                    <option value="yearly" ${businessSettings.defaultReportPeriod === 'yearly' ? 'selected' : ''}>Yearly</option>
                                 </select>
                             </div>
                             <div style="display: flex; align-items: center; justify-content: space-between;">
                                 <label>Export Format</label>
-                                <select style="padding: 8px; background: var(--bg-tertiary); border: 1px solid var(--border); border-radius: 6px; color: var(--text-primary);">
-                                    <option value="csv" selected>CSV</option>
-                                    <option value="pdf">PDF</option>
-                                    <option value="excel">Excel</option>
+                                <select style="padding: 8px; background: var(--bg-tertiary); border: 1px solid var(--border); border-radius: 6px; color: var(--text-primary);" onchange="businessSettings.exportFormat = this.value">
+                                    <option value="csv" ${businessSettings.exportFormat === 'csv' ? 'selected' : ''}>CSV</option>
+                                    <option value="excel" ${businessSettings.exportFormat === 'excel' ? 'selected' : ''}>Excel</option>
                                 </select>
                             </div>
                         </div>
@@ -5328,6 +5570,15 @@
 
         function resetSettings() {
             applyPresetTheme('dark');
+            businessSettings = {
+                enableSound: true,
+                autoSave: true,
+                lowStockAlerts: true,
+                currency: 'GHS',
+                defaultReportPeriod: 'daily',
+                exportFormat: 'csv'
+            };
+            renderMainContent();
         }
 
         function saveSettings() {
