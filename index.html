@@ -15,13 +15,13 @@
     <script type="text/javascript" src="https://cdn.jsdelivr.net/jquery/latest/jquery.min.js"></script>
     <script type="text/javascript" src="https://cdn.jsdelivr.net/momentjs/latest/moment.min.js"></script>
     <script type="text/javascript" src="https://cdn.jsdelivr.net/npm/daterangepicker/daterangepicker.min.js"></script>
-    <!-- Add Firebase (using same version as old POS) -->
+    <!-- Add Firebase -->
     <script src="https://www.gstatic.com/firebasejs/8.10.0/firebase-app.js"></script>
     <script src="https://www.gstatic.com/firebasejs/8.10.0/firebase-database.js"></script>
     <!-- Add XLSX for Excel export/import -->
     <script src="https://cdnjs.cloudflare.com/ajax/libs/xlsx/0.18.5/xlsx.full.min.js"></script>
     <style>
-        /* Your existing CSS remains exactly the same - keeping all your styles */
+        /* ALL YOUR EXISTING CSS STAYS EXACTLY THE SAME */
         * {
             margin: 0;
             padding: 0;
@@ -53,6 +53,7 @@
             overflow: hidden;
         }
 
+        /* App Container */
         .app-container {
             display: grid;
             grid-template-columns: 280px 1fr;
@@ -60,6 +61,7 @@
             overflow: hidden;
         }
 
+        /* Sidebar */
         .sidebar {
             background-color: var(--bg-secondary);
             border-right: 1px solid var(--border);
@@ -273,6 +275,7 @@
             display: inline-block;
         }
 
+        /* Main Content */
         .main-content {
             background-color: var(--bg-primary);
             padding: 24px 32px;
@@ -280,6 +283,7 @@
             height: 100vh;
         }
 
+        /* Header */
         .header {
             display: flex;
             justify-content: space-between;
@@ -318,6 +322,7 @@
             color: var(--text-secondary);
         }
 
+        /* Stats Grid */
         .stats-grid {
             display: grid;
             grid-template-columns: repeat(4, 1fr);
@@ -351,6 +356,7 @@
             color: var(--success);
         }
 
+        /* Daily Audit Section */
         .daily-audit {
             background-color: var(--bg-secondary);
             border-radius: 20px;
@@ -471,6 +477,7 @@
             background: linear-gradient(90deg, var(--info), #60a5fa);
         }
 
+        /* Shop Performance */
         .shop-performance {
             background-color: var(--bg-secondary);
             border-radius: 20px;
@@ -522,6 +529,7 @@
             border-bottom: 2px solid var(--border);
         }
 
+        /* Tabs */
         .tabs {
             display: flex;
             gap: 8px;
@@ -546,6 +554,7 @@
             color: var(--text-primary);
         }
 
+        /* Content Grid */
         .content-grid {
             display: grid;
             grid-template-columns: repeat(2, 1fr);
@@ -560,6 +569,7 @@
             border: 1px solid var(--border);
         }
 
+        /* Inventory Table */
         .inventory-table {
             width: 100%;
             margin-top: 16px;
@@ -601,6 +611,7 @@
             font-size: 12px;
         }
 
+        /* Action Buttons */
         .btn {
             padding: 10px 20px;
             border-radius: 10px;
@@ -657,6 +668,7 @@
             opacity: 0.9;
         }
 
+        /* POS Interface */
         .pos-container {
             display: grid;
             grid-template-columns: 1fr 350px;
@@ -808,6 +820,66 @@
             background: linear-gradient(135deg, var(--accent-primary), var(--accent-secondary));
         }
 
+        /* Cash Log Section */
+        .cash-log-section {
+            margin-top: 20px;
+            padding: 16px;
+            background-color: var(--bg-tertiary);
+            border-radius: 12px;
+            border: 1px solid var(--border);
+        }
+
+        .cash-log-title {
+            font-size: 16px;
+            font-weight: 600;
+            margin-bottom: 12px;
+            color: var(--warning);
+        }
+
+        .cash-log-buttons {
+            display: grid;
+            grid-template-columns: 1fr 1fr;
+            gap: 8px;
+            margin-bottom: 12px;
+        }
+
+        .cash-log-btn {
+            padding: 10px;
+            border-radius: 8px;
+            border: 1px solid var(--border);
+            background: var(--bg-secondary);
+            color: var(--text-primary);
+            cursor: pointer;
+            transition: all 0.2s;
+            font-size: 12px;
+        }
+
+        .cash-log-btn:hover {
+            background-color: var(--warning);
+            border-color: var(--warning);
+        }
+
+        .cash-log-btn.damage:hover {
+            background-color: var(--danger);
+            border-color: var(--danger);
+        }
+
+        .cash-log-input {
+            width: 100%;
+            padding: 10px;
+            background: var(--bg-secondary);
+            border: 1px solid var(--border);
+            border-radius: 8px;
+            color: var(--text-primary);
+            margin-bottom: 8px;
+        }
+
+        .cash-log-input:focus {
+            outline: none;
+            border-color: var(--warning);
+        }
+
+        /* Category Filter in POS */
         .pos-category-filters {
             display: flex;
             flex-wrap: wrap;
@@ -833,6 +905,7 @@
             background-color: var(--accent-primary);
         }
 
+        /* Reports Specific Styles */
         .reports-container {
             display: flex;
             flex-direction: column;
@@ -903,6 +976,7 @@
             border-color: var(--accent-primary);
         }
 
+        /* KPI Cards */
         .kpi-grid {
             display: grid;
             grid-template-columns: repeat(4, 1fr);
@@ -969,6 +1043,7 @@
             color: var(--danger);
         }
 
+        /* Chart Grid */
         .chart-grid {
             display: grid;
             grid-template-columns: repeat(2, 1fr);
@@ -1018,6 +1093,7 @@
             position: relative;
         }
 
+        /* Data Table */
         .data-table-container {
             background-color: var(--bg-secondary);
             border-radius: 20px;
@@ -1140,6 +1216,7 @@
             font-size: 14px;
         }
 
+        /* Summary Cards */
         .summary-grid {
             display: grid;
             grid-template-columns: repeat(3, 1fr);
@@ -1185,6 +1262,7 @@
             border-radius: 2px;
         }
 
+        /* Staff Management Styles */
         .staff-grid {
             display: grid;
             grid-template-columns: repeat(auto-fill, minmax(350px, 1fr));
@@ -1324,6 +1402,7 @@
             flex: 1;
         }
 
+        /* Audit Styles */
         .audit-filters {
             display: flex;
             gap: 16px;
@@ -1375,6 +1454,7 @@
             font-size: 14px;
         }
 
+        /* Audit Table */
         .audit-table {
             width: 100%;
             margin-top: 20px;
@@ -1424,6 +1504,7 @@
             transform: translateY(-2px);
         }
 
+        /* Total Loss Card */
         .total-loss-card {
             background: linear-gradient(135deg, rgba(239, 68, 68, 0.1), rgba(239, 68, 68, 0.2));
             border: 1px solid var(--danger);
@@ -1444,6 +1525,7 @@
             color: var(--danger);
         }
 
+        /* Paystack Processing Indicator */
         .paystack-processing {
             position: fixed;
             top: 0;
@@ -1476,6 +1558,7 @@
             to { transform: rotate(360deg); }
         }
 
+        /* Modal */
         .modal {
             position: fixed;
             top: 0;
@@ -1557,6 +1640,7 @@
             color: white;
         }
 
+        /* Form Elements */
         .form-group {
             margin-bottom: 20px;
         }
@@ -1597,6 +1681,7 @@
             margin-top: 4px;
         }
 
+        /* File Upload */
         .file-upload-area {
             border: 2px dashed var(--border);
             border-radius: 16px;
@@ -1632,6 +1717,7 @@
             color: var(--text-muted);
         }
 
+        /* Preview Table */
         .preview-table {
             width: 100%;
             border-collapse: collapse;
@@ -1682,6 +1768,7 @@
             color: var(--danger);
         }
 
+        /* Business Type Badges */
         .business-badge {
             display: inline-block;
             padding: 4px 8px;
@@ -1694,6 +1781,7 @@
             border: 1px solid var(--accent-primary);
         }
 
+        /* Settings Panel */
         .settings-panel {
             background-color: var(--bg-secondary);
             border-radius: 20px;
@@ -1778,6 +1866,7 @@
             color: white;
         }
 
+        /* Scrollbar Styling */
         ::-webkit-scrollbar {
             width: 8px;
             height: 8px;
@@ -1796,6 +1885,7 @@
             background: var(--text-muted);
         }
 
+        /* Responsive */
         @media (max-width: 1200px) {
             .stats-grid,
             .kpi-grid,
@@ -1855,6 +1945,7 @@
             }
         }
 
+        /* Date Range Picker Customization */
         .daterangepicker {
             background-color: var(--bg-secondary) !important;
             border-color: var(--border) !important;
@@ -1920,7 +2011,7 @@
             </div>
 
             <div class="nav-menu" id="navMenu">
-                <div class="nav-item" data-tab="overview" onclick="switchTab('overview')">
+                <div class="nav-item active" data-tab="overview" onclick="switchTab('overview')">
                     <span>📊</span>
                     <span>Overview</span>
                 </div>
@@ -1954,7 +2045,7 @@
                 <div class="user-avatar" id="userAvatar">SA</div>
                 <div>
                     <div style="font-weight: 500;" id="currentUserName">Not Logged In</div>
-                    <div class="user-role" id="currentUserRole">Click to Login</div>
+                    <div class="user-role" id="currentUserRole">Click Business to Login</div>
                 </div>
             </div>
         </div>
@@ -2237,7 +2328,7 @@
             <h2 style="margin-bottom: 24px;">Start Stock Audit</h2>
             <div class="form-group">
                 <label>Audit Date</label>
-                <input type="text" id="auditStartDate" class="date-picker" placeholder="Select date">
+                <input type="text" id="auditStartDate" class="date-picker" placeholder="Select date" value="${moment().format('YYYY-MM-DD')}">
             </div>
             <div class="form-group">
                 <label>Audit Type</label>
@@ -2280,6 +2371,48 @@
             <div style="display: flex; gap: 12px; justify-content: flex-end; margin-top: 24px;">
                 <button class="btn btn-secondary" onclick="exportAuditReport()">📥 Export Report</button>
                 <button class="btn btn-primary" onclick="closeModal('viewAuditModal')">Close</button>
+            </div>
+        </div>
+    </div>
+
+    <!-- Cash Log Modal -->
+    <div class="modal" id="cashLogModal">
+        <div class="modal-content small">
+            <div class="modal-close" onclick="closeModal('cashLogModal')">
+                <i class="fas fa-times"></i>
+            </div>
+            <h2 style="margin-bottom: 24px;">Log Cash Issue</h2>
+            
+            <div class="form-group">
+                <label>Type</label>
+                <select id="cashLogType">
+                    <option value="shortage">💰 Cash Shortage (Missing Money)</option>
+                    <option value="surplus">💵 Cash Surplus (Extra Money)</option>
+                    <option value="damage">🔨 Damaged Item</option>
+                    <option value="broken">💔 Broken Item</option>
+                </select>
+            </div>
+            
+            <div class="form-group">
+                <label>Amount (GHS)</label>
+                <input type="number" id="cashLogAmount" step="0.01" min="0" value="0.00">
+            </div>
+            
+            <div class="form-group">
+                <label>Description / Reason</label>
+                <textarea id="cashLogDescription" rows="3" placeholder="Explain what happened..."></textarea>
+            </div>
+            
+            <div class="form-group" id="itemSelectGroup" style="display: none;">
+                <label>Select Item (for damaged/broken)</label>
+                <select id="cashLogItem">
+                    <option value="">Select an item</option>
+                </select>
+            </div>
+            
+            <div style="display: flex; gap: 12px; justify-content: flex-end;">
+                <button class="btn btn-secondary" onclick="closeModal('cashLogModal')">Cancel</button>
+                <button class="btn btn-primary" onclick="saveCashLog()">Save Log</button>
             </div>
         </div>
     </div>
@@ -2463,6 +2596,7 @@
 
         // ==================== FIREBASE DATA LOADING ====================
         
+        // Load registry from Firebase
         db.ref('registry').on('value', (snapshot) => {
             registry = snapshot.val() || {};
             console.log('Registry loaded:', registry);
@@ -2480,6 +2614,7 @@
             renderShopList();
         });
 
+        // Load shop data
         function loadShopData(shopId) {
             const shopPath = `shops/${shopId}`;
             
@@ -2504,13 +2639,13 @@
                     
                     if (currentShop && currentShop.id === shopId) {
                         currentShop = shop;
-                        updateNavigation();
                         renderMainContent();
                     }
                 }
             });
         }
 
+        // Calculate shop revenue from reports
         function calculateShopRevenue(shopId, shop) {
             db.ref(`reports/${shopId}`).once('value', (snapshot) => {
                 const reports = snapshot.val() || {};
@@ -2555,10 +2690,11 @@
             cart = [];
             
             document.getElementById('currentUserName').textContent = 'Not Logged In';
-            document.getElementById('currentUserRole').textContent = 'Click to Login';
+            document.getElementById('currentUserRole').textContent = 'Click Business to Login';
             document.getElementById('userAvatar').textContent = '?';
             
             updateNavigation();
+            renderShopList();
             renderMainContent();
         }
 
@@ -2570,15 +2706,15 @@
             navItems.forEach(item => {
                 const tab = item.getAttribute('data-tab');
                 
-                // Always show overview and pos
+                // Always show overview and pos for everyone
                 if (tab === 'overview' || tab === 'pos') {
                     item.style.display = 'flex';
                 }
-                // Show inventory and audit for supervisors and admins
-                else if (tab === 'inventory' || tab === 'audit') {
+                // Show inventory, reports, audit for supervisors and admins
+                else if (tab === 'inventory' || tab === 'reports' || tab === 'audit') {
                     item.style.display = isSupervisor ? 'flex' : 'none';
                 }
-                // Show reports, staff, settings only for admins
+                // Show staff and settings only for admins
                 else {
                     item.style.display = isAdmin ? 'flex' : 'none';
                 }
@@ -2605,7 +2741,7 @@
             
             shopList.innerHTML = shops.map(shop => `
                 <div class="shop-item ${shop.id === currentShop?.id ? 'active' : ''}" onclick="openPinGate('${shop.id}')">
-                    <div class="shop-icon">${shop.logo ? '<img src="' + shop.logo + '" style="width:32px; height:32px; border-radius:6px; object-fit:cover;">' : '🏪'}</div>
+                    <div class="shop-icon">🏪</div>
                     <div class="shop-details">
                         <div class="shop-name">
                             ${shop.name}
@@ -2723,6 +2859,8 @@
                 shopToDelete = null;
                 renderShopList();
                 renderMainContent();
+                
+                alert('Business deleted successfully');
             }
         }
 
@@ -2784,10 +2922,6 @@
             document.getElementById('permViewReports').checked = true;
             
             window.editingStaffIndex = null;
-            
-            const addBtn = document.querySelector('#addStaffModal .btn-primary');
-            addBtn.textContent = 'Add Staff';
-            addBtn.onclick = addNewStaff;
         }
 
         function addNewStaff() {
@@ -2862,6 +2996,7 @@
                     closeModal('deleteStaffModal');
                     staffToDelete = null;
                     renderMainContent();
+                    alert('Staff member deleted successfully');
                 });
             }
         }
@@ -2947,6 +3082,111 @@
             }
         }
 
+        // ==================== CASH LOG FUNCTIONS ====================
+
+        function showCashLogModal() {
+            if (!currentShop) return;
+            
+            // Populate item dropdown for damage/broken items
+            const itemSelect = document.getElementById('cashLogItem');
+            itemSelect.innerHTML = '<option value="">Select an item</option>' + 
+                currentShop.inventory.map(item => `<option value="${item.id}" data-price="${item.price}">${item.name} (GHS ${item.price})</option>`).join('');
+            
+            document.getElementById('cashLogType').value = 'shortage';
+            document.getElementById('cashLogAmount').value = '0.00';
+            document.getElementById('cashLogDescription').value = '';
+            document.getElementById('itemSelectGroup').style.display = 'none';
+            
+            document.getElementById('cashLogModal').classList.add('active');
+        }
+
+        function setupCashLogTypeListener() {
+            document.getElementById('cashLogType').addEventListener('change', function(e) {
+                const type = e.target.value;
+                const itemGroup = document.getElementById('itemSelectGroup');
+                const amountField = document.getElementById('cashLogAmount');
+                
+                if (type === 'damage' || type === 'broken') {
+                    itemGroup.style.display = 'block';
+                } else {
+                    itemGroup.style.display = 'none';
+                }
+                
+                // Set amount field based on selected item for damage/broken
+                if (type === 'damage' || type === 'broken') {
+                    const itemSelect = document.getElementById('cashLogItem');
+                    if (itemSelect.value) {
+                        const selectedOption = itemSelect.options[itemSelect.selectedIndex];
+                        const price = selectedOption.getAttribute('data-price');
+                        if (price) {
+                            amountField.value = price;
+                        }
+                    }
+                }
+            });
+            
+            document.getElementById('cashLogItem').addEventListener('change', function(e) {
+                const type = document.getElementById('cashLogType').value;
+                if (type === 'damage' || type === 'broken') {
+                    const selectedOption = e.target.options[e.target.selectedIndex];
+                    const price = selectedOption.getAttribute('data-price');
+                    if (price) {
+                        document.getElementById('cashLogAmount').value = price;
+                    }
+                }
+            });
+        }
+
+        function saveCashLog() {
+            const type = document.getElementById('cashLogType').value;
+            const amount = parseFloat(document.getElementById('cashLogAmount').value);
+            const description = document.getElementById('cashLogDescription').value.trim();
+            const itemId = document.getElementById('cashLogItem').value;
+            
+            if (amount <= 0) {
+                alert('Please enter a valid amount');
+                return;
+            }
+            
+            if (!description) {
+                alert('Please enter a description');
+                return;
+            }
+            
+            if ((type === 'damage' || type === 'broken') && !itemId) {
+                alert('Please select an item');
+                return;
+            }
+            
+            const today = new Date().toISOString().split('T')[0];
+            
+            // If damaged or broken, update inventory
+            if ((type === 'damage' || type === 'broken') && itemId) {
+                const product = currentShop.inventory.find(p => p.id == itemId);
+                if (product && product.stock > 0) {
+                    product.stock -= 1; // Remove one damaged item
+                    db.ref(`${currentShopPath}/inventory`).set(currentShop.inventory);
+                }
+            }
+            
+            // Create log entry
+            const logEntry = {
+                type: type,
+                amount: amount,
+                description: description,
+                itemId: itemId || null,
+                staff: currentUser.name,
+                time: new Date().toLocaleTimeString(),
+                date: today
+            };
+            
+            // Save to Firebase under reports
+            db.ref(`reports/${currentShop.id}/${today}/cash_logs`).push(logEntry).then(() => {
+                alert('Cash log saved successfully!');
+                closeModal('cashLogModal');
+            });
+        }
+
         // ==================== INVENTORY FUNCTIONS ====================
 
         function addSingleProduct() {
@@ -2993,6 +3233,7 @@
             db.ref(`${currentShopPath}/inventory`).set(currentShop.inventory).then(() => {
                 closeModal('addProductModal');
                 refreshInventory();
+                alert('Product added successfully!');
             });
         }
 
@@ -3005,7 +3246,7 @@
                 document.getElementById('editProductCostPrice').value = product.costPrice || 0;
                 document.getElementById('editProductPrice').value = product.price;
                 document.getElementById('editProductStock').value = product.stock;
-                document.getElementById('editProductMinStock').value = product.minStock || 10;
+                document.getElementById('editProductMinStock').value = product.minStock;
                 
                 document.getElementById('editProductModal').classList.add('active');
             }
@@ -3047,6 +3288,7 @@
                 db.ref(`${currentShopPath}/inventory`).set(currentShop.inventory).then(() => {
                     closeModal('editProductModal');
                     refreshInventory();
+                    alert('Product updated successfully!');
                 });
             }
         }
@@ -3156,6 +3398,7 @@
                 db.ref(`${currentShopPath}/inventory`).set(currentShop.inventory).then(() => {
                     closeModal('bulkStockModal');
                     refreshInventory();
+                    alert(`✅ Successfully added ${quantity} units to ${product.name}`);
                 });
             }
         }
@@ -3207,13 +3450,10 @@
 
         function selectPayment(method) {
             selectedPaymentMethod = method;
-            const methods = document.querySelectorAll('.payment-method');
-            methods.forEach(el => {
+            document.querySelectorAll('.payment-method').forEach(el => {
                 el.classList.remove('active');
             });
-            if (event.target.classList) {
-                event.target.classList.add('active');
-            }
+            event.target.classList.add('active');
         }
 
         function updateTotalWithDiscount() {
@@ -3477,7 +3717,7 @@
             }, 0);
             
             const auditRecord = {
-                id: Date.now(),
+                id: auditRecords.length + 1,
                 date: currentAudit.date,
                 type: currentAudit.type,
                 status: 'Completed',
@@ -3499,7 +3739,7 @@
                 })
             };
             
-            auditRecords.push(auditRecord);
+            auditRecords.unshift(auditRecord);
             
             const auditDate = currentAudit.date;
             db.ref(`reports/${currentShop.id}/${auditDate}/stock_audits`).push({
@@ -3635,6 +3875,136 @@
 
         // ==================== REPORT FUNCTIONS ====================
 
+        function initAllDatePickers() {
+            if (typeof $ !== 'undefined') {
+                $('#auditDateRange').daterangepicker({
+                    singleDatePicker: true,
+                    showDropdowns: true,
+                    minYear: 2020,
+                    maxYear: parseInt(moment().format('YYYY')),
+                    locale: {
+                        format: 'YYYY-MM-DD'
+                    }
+                }, function(start) {
+                    selectedAuditDate = start.format('YYYY-MM-DD');
+                    loadDailyAuditData(selectedAuditDate);
+                    document.getElementById('selectedAuditDate').textContent = start.format('MMM D, YYYY');
+                    document.getElementById('auditDateDisplay').textContent = start.format('MMMM D, YYYY');
+                });
+
+                $('.date-picker').daterangepicker({
+                    singleDatePicker: true,
+                    showDropdowns: true,
+                    minYear: 2020,
+                    maxYear: parseInt(moment().format('YYYY')),
+                    locale: {
+                        format: 'YYYY-MM-DD'
+                    }
+                });
+            }
+        }
+
+        function loadDailyAuditData(date) {
+            if (!currentShop) return;
+            
+            db.ref(`reports/${currentShop.id}/${date}`).once('value', (snapshot) => {
+                const data = snapshot.val() || {};
+                
+                // Calculate sales totals
+                let totalSales = 0;
+                let transactionCount = 0;
+                let totalProfit = 0;
+                let cashTotal = 0;
+                let momoTotal = 0;
+                
+                // Category breakdown
+                let beverageTotal = 0;
+                let alcoholicTotal = 0;
+                let otherTotal = 0;
+                
+                // Product sales count for top product
+                let productSales = {};
+                
+                if (data.sales) {
+                    Object.values(data.sales).forEach(sale => {
+                        totalSales += parseFloat(sale.total || 0);
+                        totalProfit += parseFloat(sale.profit || 0);
+                        transactionCount++;
+                        
+                        if (sale.paymentMethod && sale.paymentMethod.includes('Cash')) {
+                            cashTotal += parseFloat(sale.total || 0);
+                        } else {
+                            momoTotal += parseFloat(sale.total || 0);
+                        }
+                        
+                        if (sale.itemDetails) {
+                            sale.itemDetails.forEach(item => {
+                                productSales[item.name] = (productSales[item.name] || 0) + (item.qty || 1);
+                                
+                                // Categorize by product category (need to look up from inventory)
+                                const product = currentShop.inventory.find(p => p.name === item.name);
+                                if (product) {
+                                    const category = product.category.toLowerCase();
+                                    const itemTotal = (item.qty || 1) * (item.price || 0);
+                                    
+                                    if (category.includes('beverage')) {
+                                        beverageTotal += itemTotal;
+                                    } else if (category.includes('alcoholic') || category.includes('alcohol')) {
+                                        alcoholicTotal += itemTotal;
+                                    } else {
+                                        otherTotal += itemTotal;
+                                    }
+                                } else {
+                                    otherTotal += (item.qty || 1) * (item.price || 0);
+                                }
+                            });
+                        }
+                    });
+                }
+                
+                // Get top product
+                let topProduct = 'No sales';
+                let topProductQty = 0;
+                Object.entries(productSales).forEach(([name, qty]) => {
+                    if (qty > topProductQty) {
+                        topProduct = name;
+                        topProductQty = qty;
+                    }
+                });
+                
+                // Determine busiest hour (simplified - would need timestamp analysis in real app)
+                const busiestHour = '18:00 - 19:00';
+                
+                // Update the DOM
+                document.getElementById('auditTotalSales').textContent = `GHS ${totalSales.toFixed(2)}`;
+                document.getElementById('auditTransactions').textContent = transactionCount;
+                document.getElementById('auditProfit').textContent = `GHS ${totalProfit.toFixed(2)}`;
+                document.getElementById('auditTopProduct').textContent = topProduct;
+                document.getElementById('auditBusiestHour').textContent = busiestHour;
+                
+                const cashPercent = totalSales > 0 ? (cashTotal / totalSales * 100).toFixed(1) : 0;
+                const momoPercent = totalSales > 0 ? (momoTotal / totalSales * 100).toFixed(1) : 0;
+                
+                document.getElementById('auditCashAmount').textContent = `GHS ${cashTotal.toFixed(2)} (${cashPercent}%)`;
+                document.getElementById('auditMomoAmount').textContent = `GHS ${momoTotal.toFixed(2)} (${momoPercent}%)`;
+                
+                document.getElementById('cashBar').style.width = `${cashPercent}%`;
+                document.getElementById('momoBar').style.width = `${momoPercent}%`;
+                
+                const beveragePercent = totalSales > 0 ? (beverageTotal / totalSales * 100).toFixed(1) : 0;
+                const alcoholicPercent = totalSales > 0 ? (alcoholicTotal / totalSales * 100).toFixed(1) : 0;
+                const otherPercent = totalSales > 0 ? (otherTotal / totalSales * 100).toFixed(1) : 0;
+                
+                document.getElementById('beverageAmount').textContent = `GHS ${beverageTotal.toFixed(2)} (${beveragePercent}%)`;
+                document.getElementById('alcoholicAmount').textContent = `GHS ${alcoholicTotal.toFixed(2)} (${alcoholicPercent}%)`;
+                document.getElementById('otherAmount').textContent = `GHS ${otherTotal.toFixed(2)} (${otherPercent}%)`;
+                
+                document.getElementById('beverageBar').style.width = `${beveragePercent}%`;
+                document.getElementById('alcoholicBar').style.width = `${alcoholicPercent}%`;
+                document.getElementById('otherBar').style.width = `${otherPercent}%`;
+            });
+        }
+
         function changeReportPeriod(period) {
             currentReportPeriod = period;
             document.querySelectorAll('.period-btn').forEach(btn => {
@@ -3759,8 +4129,8 @@
         // ==================== UI FUNCTIONS ====================
 
         function switchTab(tab) {
-            if (!currentUser) {
-                alert('Please login first');
+            if (!currentUser || !currentShop) {
+                alert('Please select a business and login first');
                 return;
             }
             
@@ -3777,29 +4147,16 @@
         }
 
         function renderMainContent() {
-            if (!currentUser) {
+            if (!currentUser || !currentShop) {
                 document.getElementById('mainContent').innerHTML = `
                     <div style="display: flex; justify-content: center; align-items: center; height: 80vh;">
                         <div style="text-align: center;">
                             <i class="fas fa-store" style="font-size: 64px; color: var(--text-secondary); margin-bottom: 20px;"></i>
                             <h2>Welcome to POS Hub</h2>
-                            <p style="color: var(--text-secondary); margin: 20px 0;">Click on a business in the sidebar to login</p>
+                            <p style="color: var(--text-secondary); margin: 20px 0;">Click on a business in the sidebar and enter your PIN to login</p>
                             <button class="btn btn-primary" onclick="showAddShopModal()">
                                 <i class="fas fa-plus"></i> Add Your First Business
                             </button>
-                        </div>
-                    </div>
-                `;
-                return;
-            }
-
-            if (!currentShop) {
-                document.getElementById('mainContent').innerHTML = `
-                    <div style="display: flex; justify-content: center; align-items: center; height: 80vh;">
-                        <div style="text-align: center;">
-                            <i class="fas fa-store" style="font-size: 64px; color: var(--text-secondary); margin-bottom: 20px;"></i>
-                            <h2>Select a Business</h2>
-                            <p style="color: var(--text-secondary);">Choose a business from the sidebar to continue</p>
                         </div>
                     </div>
                 `;
@@ -3813,6 +4170,7 @@
                     content.innerHTML = renderOverview();
                     setTimeout(() => {
                         initAllDatePickers();
+                        loadDailyAuditData(moment().format('YYYY-MM-DD'));
                     }, 100);
                     break;
                 case 'pos':
@@ -3840,13 +4198,13 @@
         }
 
         function renderOverview() {
-            const lowStockCount = currentShop.inventory.filter(i => i.stock <= i.minStock && i.stock > 0).length;
-            
+            if (!currentShop) return '';
+
             return `
                 <div class="header">
                     <div class="page-title">
                         <h1>Dashboard Overview - ${currentShop.name}</h1>
-                        <p>Welcome back, ${currentUser ? currentUser.name : 'User'}. Here's what's happening.</p>
+                        <p>Welcome back, ${currentUser.name}. Here's what's happening.</p>
                     </div>
                     <div class="date-range" id="auditDateRange">
                         <span>📅</span>
@@ -3878,7 +4236,7 @@
                             <span>📦</span>
                         </div>
                         <div class="stat-value">${currentShop.inventory.length}</div>
-                        <div class="stat-change">${lowStockCount} low stock</div>
+                        <div class="stat-change">${currentShop.inventory.filter(i => i.stock <= 5).length} low stock</div>
                     </div>
                     <div class="stat-card">
                         <div class="stat-header">
@@ -3889,10 +4247,114 @@
                         <div class="stat-change">Active team</div>
                     </div>
                 </div>
+
+                <div class="daily-audit">
+                    <div class="audit-header">
+                        <h2 class="audit-title">Daily Business Review - <span id="auditDateDisplay">${moment().format('MMMM D, YYYY')}</span></h2>
+                        <div class="audit-date-picker" id="auditDatePicker">
+                            <i class="fas fa-calendar-alt"></i>
+                            <span>Change Date</span>
+                        </div>
+                    </div>
+
+                    <div class="audit-summary">
+                        <div class="audit-summary-card">
+                            <div class="audit-summary-label">Total Sales</div>
+                            <div class="audit-summary-value" id="auditTotalSales">GHS 0.00</div>
+                            <div class="audit-summary-change">Loading...</div>
+                        </div>
+                        <div class="audit-summary-card">
+                            <div class="audit-summary-label">Transactions</div>
+                            <div class="audit-summary-value" id="auditTransactions">0</div>
+                            <div class="audit-summary-change">Loading...</div>
+                        </div>
+                        <div class="audit-summary-card">
+                            <div class="audit-summary-label">Gross Profit</div>
+                            <div class="audit-summary-value" id="auditProfit">GHS 0.00</div>
+                            <div class="audit-summary-change">Loading...</div>
+                        </div>
+                    </div>
+
+                    <div class="audit-breakdown">
+                        <div class="audit-breakdown-item">
+                            <div class="breakdown-header">
+                                <span>💰 Payment Methods</span>
+                                <span>Today</span>
+                            </div>
+                            <div style="margin-bottom: 12px;">
+                                <div style="display: flex; justify-content: space-between; margin-bottom: 4px;">
+                                    <span>Cash</span>
+                                    <span id="auditCashAmount">GHS 0.00 (0%)</span>
+                                </div>
+                                <div class="breakdown-bar">
+                                    <div class="breakdown-fill fill-success" id="cashBar" style="width: 0%"></div>
+                                </div>
+                            </div>
+                            <div>
+                                <div style="display: flex; justify-content: space-between; margin-bottom: 4px;">
+                                    <span>Mobile Money</span>
+                                    <span id="auditMomoAmount">GHS 0.00 (0%)</span>
+                                </div>
+                                <div class="breakdown-bar">
+                                    <div class="breakdown-fill fill-info" id="momoBar" style="width: 0%"></div>
+                                </div>
+                            </div>
+                        </div>
+
+                        <div class="audit-breakdown-item">
+                            <div class="breakdown-header">
+                                <span>📦 Top Categories</span>
+                                <span>Today</span>
+                            </div>
+                            <div style="margin-bottom: 12px;">
+                                <div style="display: flex; justify-content: space-between; margin-bottom: 4px;">
+                                    <span>Beverages</span>
+                                    <span id="beverageAmount">GHS 0.00 (0%)</span>
+                                </div>
+                                <div class="breakdown-bar">
+                                    <div class="breakdown-fill fill-success" id="beverageBar" style="width: 0%"></div>
+                                </div>
+                            </div>
+                            <div style="margin-bottom: 12px;">
+                                <div style="display: flex; justify-content: space-between; margin-bottom: 4px;">
+                                    <span>Alcoholic</span>
+                                    <span id="alcoholicAmount">GHS 0.00 (0%)</span>
+                                </div>
+                                <div class="breakdown-bar">
+                                    <div class="breakdown-fill fill-warning" id="alcoholicBar" style="width: 0%"></div>
+                                </div>
+                            </div>
+                            <div>
+                                <div style="display: flex; justify-content: space-between; margin-bottom: 4px;">
+                                    <span>Other</span>
+                                    <span id="otherAmount">GHS 0.00 (0%)</span>
+                                </div>
+                                <div class="breakdown-bar">
+                                    <div class="breakdown-fill fill-info" id="otherBar" style="width: 0%"></div>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+
+                    <div style="display: grid; grid-template-columns: 1fr 1fr; gap: 20px; margin-top: 20px;">
+                        <div class="summary-card">
+                            <div class="summary-label">🏆 Top Selling Product</div>
+                            <div class="summary-value" id="auditTopProduct">No sales</div>
+                            <div class="summary-sub">Today's best seller</div>
+                        </div>
+                        <div class="summary-card">
+                            <div class="summary-label">⏰ Busiest Hour</div>
+                            <div class="summary-value" id="auditBusiestHour">--:--</div>
+                            <div class="summary-sub">Peak sales time</div>
+                        </div>
+                    </div>
+                </div>
             `;
         }
 
         function renderPOS() {
+            if (!currentShop) return '';
+
             const total = cart.reduce((sum, item) => sum + (item.price * item.quantity), 0);
             const categories = [...new Set(currentShop.inventory.map(item => item.category))];
             
@@ -3900,7 +4362,7 @@
                 <div class="header">
                     <div class="page-title">
                         <h1>POS Terminal - ${currentShop.name}</h1>
-                        <p>${currentShop.type} | Staff: ${currentUser ? currentUser.name : 'Unknown'} (${currentUser ? currentUser.role : 'Unknown'})</p>
+                        <p>${currentShop.type} | Staff: ${currentUser.name} (${currentUser.role})</p>
                     </div>
                 </div>
 
@@ -3916,7 +4378,7 @@
 
                         <div class="product-grid" id="posProductGrid">
                             ${currentShop.inventory.map(item => `
-                                <div class="product-card ${item.stock === 0 ? 'out-of-stock' : ''}" onclick='addToCart(${JSON.stringify(item).replace(/'/g, "&apos;")})' data-category="${item.category}" data-name="${item.name.toLowerCase()}">
+                                <div class="product-card ${item.stock === 0 ? 'out-of-stock' : ''}" onclick='addToCart(${JSON.stringify(item)})' data-category="${item.category}" data-name="${item.name.toLowerCase()}">
                                     <div class="product-category">${item.category}</div>
                                     <div class="product-name">${item.name}</div>
                                     <div class="product-price">GHS ${item.price}</div>
@@ -3972,6 +4434,22 @@
                             </div>
                         </div>
 
+                        <!-- Cash Log Section for Staff -->
+                        <div class="cash-log-section">
+                            <div class="cash-log-title">💰 Cash Log / Issues</div>
+                            <div class="cash-log-buttons">
+                                <button class="cash-log-btn" onclick="showCashLogModal()">
+                                    <i class="fas fa-money-bill-wave"></i> Cash Issue
+                                </button>
+                                <button class="cash-log-btn damage" onclick="showCashLogModal()">
+                                    <i class="fas fa-exclamation-triangle"></i> Damaged Item
+                                </button>
+                            </div>
+                            <small style="color: var(--text-muted); display: block; text-align: center;">
+                                Report shortages, surpluses, or damaged items
+                            </small>
+                        </div>
+
                         <button class="btn btn-primary" style="width: 100%; margin-bottom: 12px;" onclick="processPayment()">
                             Process Payment
                         </button>
@@ -3985,10 +4463,11 @@
         }
 
         function renderInventory() {
+            if (!currentShop) return '';
+
             const lowStockCount = currentShop.inventory.filter(i => i.stock <= i.minStock && i.stock > 0).length;
             const outOfStockCount = currentShop.inventory.filter(i => i.stock === 0).length;
             const totalValue = currentShop.inventory.reduce((sum, item) => sum + (item.price * item.stock), 0);
-            const totalCost = currentShop.inventory.reduce((sum, item) => sum + ((item.costPrice || 0) * item.stock), 0);
             const totalProfitIfAllSold = currentShop.inventory.reduce((sum, item) => sum + ((item.price - (item.costPrice || 0)) * item.stock), 0);
             
             return `
@@ -4093,27 +4572,32 @@
                                     <p>No products yet. Click "Add Product" to get started!</p>
                                 </div>` :
                                 currentShop.inventory.map(item => {
-                                    const profitPerUnit = item.price - (item.costPrice || 0);
-                                    const profitMargin = item.costPrice ? ((profitPerUnit / item.price) * 100).toFixed(1) : 0;
-                                    const totalProfit = profitPerUnit * item.stock;
-                                    const isOutOfStock = item.stock === 0;
+                                    // Fix: Ensure values are numbers before calling toFixed
+                                    const costPrice = parseFloat(item.costPrice) || 0;
+                                    const price = parseFloat(item.price) || 0;
+                                    const stock = parseInt(item.stock) || 0;
+                                    
+                                    const profitPerUnit = price - costPrice;
+                                    const profitMargin = costPrice > 0 ? ((profitPerUnit / price) * 100).toFixed(1) : 0;
+                                    const totalProfit = profitPerUnit * stock;
+                                    const isOutOfStock = stock === 0;
                                     return `
-                                    <div class="inventory-row ${isOutOfStock ? 'out-of-stock' : ''}" data-category="${item.category.toLowerCase()}" data-stock="${item.stock}" data-minstock="${item.minStock}">
+                                    <div class="inventory-row ${isOutOfStock ? 'out-of-stock' : ''}" data-category="${item.category.toLowerCase()}" data-stock="${stock}" data-minstock="${item.minStock}">
                                         <div data-label="Product">${item.name}</div>
                                         <div data-label="Category">${item.category}</div>
-                                        <div data-label="Cost Price">GHS ${(item.costPrice || 0).toFixed(2)}</div>
-                                        <div data-label="Selling Price">GHS ${item.price.toFixed(2)}</div>
+                                        <div data-label="Cost Price">GHS ${costPrice.toFixed(2)}</div>
+                                        <div data-label="Selling Price">GHS ${price.toFixed(2)}</div>
                                         <div data-label="Profit/Unit" style="color: ${profitPerUnit > 0 ? 'var(--success)' : 'var(--danger)'}">
                                             GHS ${profitPerUnit.toFixed(2)} (${profitMargin}%)
                                         </div>
                                         <div data-label="Stock Level">
                                             <div style="display: flex; align-items: center; gap: 8px;">
-                                                <span class="${isOutOfStock ? '' : (item.stock <= item.minStock ? (item.stock < item.minStock * 0.5 ? 'critical-stock' : 'low-stock') : '')}">
-                                                    ${isOutOfStock ? 'OUT OF STOCK' : item.stock + ' units'}
+                                                <span class="${isOutOfStock ? '' : (stock <= item.minStock ? (stock < item.minStock * 0.5 ? 'critical-stock' : 'low-stock') : '')}">
+                                                    ${isOutOfStock ? 'OUT OF STOCK' : stock + ' units'}
                                                 </span>
                                                 ${!isOutOfStock ? `
                                                 <div style="width: 60px; height: 4px; background: var(--bg-tertiary); border-radius: 2px;">
-                                                    <div style="width: ${Math.min((item.stock / item.minStock) * 100, 100)}%; height: 100%; background: ${item.stock <= item.minStock ? (item.stock < item.minStock * 0.5 ? 'var(--danger)' : 'var(--warning)') : 'var(--success)'}; border-radius: 2px;"></div>
+                                                    <div style="width: ${Math.min((stock / item.minStock) * 100, 100)}%; height: 100%; background: ${stock <= item.minStock ? (stock < item.minStock * 0.5 ? 'var(--danger)' : 'var(--warning)') : 'var(--success)'}; border-radius: 2px;"></div>
                                                 </div>
                                                 ` : ''}
                                             </div>
@@ -4145,6 +4629,8 @@
         }
 
         function renderReports() {
+            if (!currentShop) return '';
+
             const totalRevenue = transactions.reduce((sum, t) => sum + t.total, 0);
             const totalTransactions = transactions.length;
             const avgOrderValue = totalTransactions > 0 ? totalRevenue / totalTransactions : 0;
@@ -4318,6 +4804,8 @@
         }
 
         function renderAudit() {
+            if (!currentShop) return '';
+
             return `
                 <div class="header">
                     <div class="page-title">
@@ -4409,6 +4897,8 @@
         }
 
         function renderStaff() {
+            if (!currentShop) return '';
+
             return `
                 <div class="header">
                     <div class="page-title">
@@ -4474,7 +4964,7 @@
                                         ${staff.name.split(' ').map(n => n[0]).join('').substring(0, 2).toUpperCase()}
                                     </div>
                                     <div class="staff-info">
-                                        <h3>${staff.name} ${staff.name === (currentUser ? currentUser.name : '') ? '(You)' : ''}</h3>
+                                        <h3>${staff.name} ${staff.name === currentUser.name ? '(You)' : ''}</h3>
                                         <span class="staff-badge badge-${staff.role === 'admin' ? 'admin' : staff.role === 'supervisor' ? 'supervisor' : 'staff'}">
                                             ${staff.role}
                                         </span>
@@ -4635,33 +5125,6 @@
         }
 
         // ==================== UTILITY FUNCTIONS ====================
-
-        function initAllDatePickers() {
-            if (typeof $ !== 'undefined') {
-                $('#auditDateRange').daterangepicker({
-                    singleDatePicker: true,
-                    showDropdowns: true,
-                    minYear: 2020,
-                    maxYear: parseInt(moment().format('YYYY')),
-                    locale: {
-                        format: 'YYYY-MM-DD'
-                    }
-                }, function(start) {
-                    selectedAuditDate = start.format('YYYY-MM-DD');
-                    document.getElementById('selectedAuditDate').textContent = start.format('MMM D, YYYY');
-                });
-
-                $('.date-picker').daterangepicker({
-                    singleDatePicker: true,
-                    showDropdowns: true,
-                    minYear: 2020,
-                    maxYear: parseInt(moment().format('YYYY')),
-                    locale: {
-                        format: 'YYYY-MM-DD'
-                    }
-                });
-            }
-        }
 
         function filterPOSProducts() {
             const searchTerm = document.getElementById('posSearch').value.toLowerCase();
@@ -5041,14 +5504,17 @@
             
             const headers = ['Category', 'Cost Price', 'Product Name', 'Selling Price', 'Stock', 'Min Stock', 'Total Profit'];
             const rows = currentShop.inventory.map(item => {
-                const profitPerUnit = item.price - (item.costPrice || 0);
-                const totalProfit = profitPerUnit * item.stock;
+                const costPrice = parseFloat(item.costPrice) || 0;
+                const price = parseFloat(item.price) || 0;
+                const stock = parseInt(item.stock) || 0;
+                const profitPerUnit = price - costPrice;
+                const totalProfit = profitPerUnit * stock;
                 return [
                     item.category,
-                    item.costPrice || 0,
+                    costPrice.toFixed(2),
                     item.name,
-                    item.price,
-                    item.stock,
+                    price.toFixed(2),
+                    stock,
                     item.minStock,
                     totalProfit.toFixed(2)
                 ];
@@ -5124,7 +5590,7 @@
         document.addEventListener('DOMContentLoaded', () => {
             renderShopList();
             renderMainContent();
-            updateNavigation();
+            setupCashLogTypeListener();
             
             setTimeout(() => {
                 initAllDatePickers();
