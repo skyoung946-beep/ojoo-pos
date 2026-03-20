@@ -1265,7 +1265,7 @@
         /* Staff Management Styles */
         .staff-grid {
             display: grid;
-            grid-template-columns: repeat(auto-fill, minmax(350px, 1fr));
+            grid-template-columns: repeat(auto-fill, minmax(400px, 1fr));
             gap: 24px;
             margin-top: 24px;
         }
@@ -1400,6 +1400,42 @@
 
         .staff-actions button {
             flex: 1;
+        }
+
+        /* Permission Group */
+        .permission-group {
+            margin-top: 16px;
+            padding: 16px;
+            background-color: var(--bg-tertiary);
+            border-radius: 12px;
+            border: 1px solid var(--border);
+        }
+
+        .permission-title {
+            font-size: 14px;
+            font-weight: 600;
+            margin-bottom: 12px;
+            color: var(--accent-primary);
+        }
+
+        .permission-checkbox {
+            display: flex;
+            align-items: center;
+            gap: 8px;
+            margin-bottom: 8px;
+        }
+
+        .permission-checkbox label {
+            color: var(--text-secondary);
+            font-size: 13px;
+            cursor: pointer;
+        }
+
+        .permission-checkbox input[type="checkbox"] {
+            width: 16px;
+            height: 16px;
+            cursor: pointer;
+            accent-color: var(--accent-primary);
         }
 
         /* Audit Styles */
@@ -2121,7 +2157,7 @@
             </div>
 
             <div class="nav-menu" id="navMenu">
-                <div class="nav-item active" data-tab="overview" onclick="switchTab('overview')">
+                <div class="nav-item" data-tab="overview" onclick="switchTab('overview')">
                     <span>📊</span>
                     <span>Overview</span>
                 </div>
@@ -2381,31 +2417,111 @@
             <div class="form-group">
                 <label>Role</label>
                 <select id="staffRole">
-                    <option value="admin">Admin</option>
-                    <option value="supervisor">Supervisor</option>
-                    <option value="staff">Staff</option>
+                    <option value="admin">Admin (Full Access)</option>
+                    <option value="supervisor">Supervisor (Custom Access)</option>
+                    <option value="staff">Staff (Custom Access)</option>
                 </select>
             </div>
-            <div class="form-group">
-                <label>Permissions</label>
-                <div style="display: flex; flex-direction: column; gap: 8px;">
-                    <label style="display: flex; align-items: center; gap: 8px;">
-                        <input type="checkbox" id="permFullAccess" checked> Full Access
-                    </label>
-                    <label style="display: flex; align-items: center; gap: 8px;">
-                        <input type="checkbox" id="permEditPrices" checked> Edit Prices
-                    </label>
-                    <label style="display: flex; align-items: center; gap: 8px;">
-                        <input type="checkbox" id="permVoidTransactions" checked> Void Transactions
-                    </label>
-                    <label style="display: flex; align-items: center; gap: 8px;">
-                        <input type="checkbox" id="permViewReports" checked> View Reports
-                    </label>
+            
+            <!-- Custom Permissions Section -->
+            <div class="permission-group" id="customPermissions">
+                <div class="permission-title">🔐 Custom Access Permissions</div>
+                <div class="permission-checkbox">
+                    <input type="checkbox" id="permOverview" checked>
+                    <label for="permOverview">View Overview Dashboard</label>
+                </div>
+                <div class="permission-checkbox">
+                    <input type="checkbox" id="permPOS" checked>
+                    <label for="permPOS">Access POS Terminal</label>
+                </div>
+                <div class="permission-checkbox">
+                    <input type="checkbox" id="permInventory">
+                    <label for="permInventory">Manage Inventory</label>
+                </div>
+                <div class="permission-checkbox">
+                    <input type="checkbox" id="permReports">
+                    <label for="permReports">View Reports</label>
+                </div>
+                <div class="permission-checkbox">
+                    <input type="checkbox" id="permAudit">
+                    <label for="permAudit">Perform Stock Audit</label>
+                </div>
+                <div class="permission-checkbox">
+                    <input type="checkbox" id="permStaff">
+                    <label for="permStaff">Manage Staff</label>
+                </div>
+                <div class="permission-checkbox">
+                    <input type="checkbox" id="permSettings">
+                    <label for="permSettings">Access Settings</label>
                 </div>
             </div>
+            
             <div style="display: flex; gap: 12px; justify-content: flex-end;">
                 <button class="btn btn-secondary" onclick="closeModal('addStaffModal')">Cancel</button>
                 <button class="btn btn-primary" onclick="addNewStaff()">Add Staff</button>
+            </div>
+        </div>
+    </div>
+
+    <!-- Edit Staff Permissions Modal -->
+    <div class="modal" id="editStaffPermissionsModal">
+        <div class="modal-content small">
+            <div class="modal-close" onclick="closeModal('editStaffPermissionsModal')">
+                <i class="fas fa-times"></i>
+            </div>
+            <h2 style="margin-bottom: 24px;">Edit Staff Permissions</h2>
+            
+            <input type="hidden" id="editStaffIndex">
+            
+            <div class="form-group">
+                <label>Staff Name</label>
+                <input type="text" id="editStaffName" readonly style="background: var(--bg-secondary);">
+            </div>
+            
+            <div class="form-group">
+                <label>Role</label>
+                <select id="editStaffRole">
+                    <option value="admin">Admin (Full Access)</option>
+                    <option value="supervisor">Supervisor (Custom Access)</option>
+                    <option value="staff">Staff (Custom Access)</option>
+                </select>
+            </div>
+            
+            <div class="permission-group">
+                <div class="permission-title">🔐 Custom Access Permissions</div>
+                <div class="permission-checkbox">
+                    <input type="checkbox" id="editPermOverview">
+                    <label for="editPermOverview">View Overview Dashboard</label>
+                </div>
+                <div class="permission-checkbox">
+                    <input type="checkbox" id="editPermPOS">
+                    <label for="editPermPOS">Access POS Terminal</label>
+                </div>
+                <div class="permission-checkbox">
+                    <input type="checkbox" id="editPermInventory">
+                    <label for="editPermInventory">Manage Inventory</label>
+                </div>
+                <div class="permission-checkbox">
+                    <input type="checkbox" id="editPermReports">
+                    <label for="editPermReports">View Reports</label>
+                </div>
+                <div class="permission-checkbox">
+                    <input type="checkbox" id="editPermAudit">
+                    <label for="editPermAudit">Perform Stock Audit</label>
+                </div>
+                <div class="permission-checkbox">
+                    <input type="checkbox" id="editPermStaff">
+                    <label for="editPermStaff">Manage Staff</label>
+                </div>
+                <div class="permission-checkbox">
+                    <input type="checkbox" id="editPermSettings">
+                    <label for="editPermSettings">Access Settings</label>
+                </div>
+            </div>
+            
+            <div style="display: flex; gap: 12px; justify-content: flex-end;">
+                <button class="btn btn-secondary" onclick="closeModal('editStaffPermissionsModal')">Cancel</button>
+                <button class="btn btn-primary" onclick="updateStaffPermissions()">Update Permissions</button>
             </div>
         </div>
     </div>
@@ -2711,6 +2827,17 @@
             exportFormat: 'csv'
         };
 
+        // Default permissions for new staff
+        const defaultPermissions = {
+            overview: true,
+            pos: true,
+            inventory: false,
+            reports: false,
+            audit: false,
+            staff: false,
+            settings: false
+        };
+
         // Paystack configuration
         const PAYSTACK_PUBLIC_KEY = 'pk_test_cfd2f3845a3448a0744254dcbeec6afcd9217306';
 
@@ -2820,23 +2947,45 @@
 
         function updateNavigation() {
             const navItems = document.querySelectorAll('.nav-item');
-            const isAdmin = currentUser && (currentUser.role === 'admin' || currentUser.role === 'Admin' || currentUser.role === 'ADMIN');
-            const isSupervisor = currentUser && (isAdmin || currentUser.role === 'supervisor' || currentUser.role === 'Supervisor');
+            const isAdmin = currentUser && (currentUser.role === 'admin');
+            const permissions = currentUser ? currentUser.permissions : null;
             
             navItems.forEach(item => {
                 const tab = item.getAttribute('data-tab');
                 
-                // Always show overview and pos for everyone
-                if (tab === 'overview' || tab === 'pos') {
+                // Admin sees everything
+                if (isAdmin) {
                     item.style.display = 'flex';
-                }
-                // Show inventory, reports, audit for supervisors and admins
-                else if (tab === 'inventory' || tab === 'reports' || tab === 'audit') {
-                    item.style.display = isSupervisor ? 'flex' : 'none';
-                }
-                // Show staff and settings only for admins
-                else {
-                    item.style.display = isAdmin ? 'flex' : 'none';
+                } 
+                // For non-admin users, check their permissions
+                else if (permissions) {
+                    switch(tab) {
+                        case 'overview':
+                            item.style.display = permissions.overview ? 'flex' : 'none';
+                            break;
+                        case 'pos':
+                            item.style.display = permissions.pos ? 'flex' : 'none';
+                            break;
+                        case 'inventory':
+                            item.style.display = permissions.inventory ? 'flex' : 'none';
+                            break;
+                        case 'reports':
+                            item.style.display = permissions.reports ? 'flex' : 'none';
+                            break;
+                        case 'audit':
+                            item.style.display = permissions.audit ? 'flex' : 'none';
+                            break;
+                        case 'staff':
+                            item.style.display = permissions.staff ? 'flex' : 'none';
+                            break;
+                        case 'settings':
+                            item.style.display = permissions.settings ? 'flex' : 'none';
+                            break;
+                        default:
+                            item.style.display = 'none';
+                    }
+                } else {
+                    item.style.display = 'none';
                 }
             });
             
@@ -2916,8 +3065,22 @@
                     currentUser = {
                         name: user.name,
                         role: role,
-                        pin: user.pin
+                        pin: user.pin,
+                        permissions: user.permissions || defaultPermissions
                     };
+                    
+                    // If admin, give all permissions
+                    if (role === 'admin') {
+                        currentUser.permissions = {
+                            overview: true,
+                            pos: true,
+                            inventory: true,
+                            reports: true,
+                            audit: true,
+                            staff: true,
+                            settings: true
+                        };
+                    }
                     
                     document.getElementById('currentUserName').textContent = user.name;
                     
@@ -3014,7 +3177,16 @@
                     staffList: [{
                         name: "Admin",
                         pin: "0000",
-                        role: "admin"
+                        role: "admin",
+                        permissions: {
+                            overview: true,
+                            pos: true,
+                            inventory: true,
+                            reports: true,
+                            audit: true,
+                            staff: true,
+                            settings: true
+                        }
                     }],
                     inventory: []
                 });
@@ -3031,15 +3203,20 @@
             businessSelect.innerHTML = '<option value="">Select Business</option>' + 
                 shops.map(shop => `<option value="${shop.id}" ${shop.id === currentShop?.id ? 'selected' : ''}>${shop.name}</option>`).join('');
             
+            // Reset permissions to default
+            document.getElementById('permOverview').checked = true;
+            document.getElementById('permPOS').checked = true;
+            document.getElementById('permInventory').checked = false;
+            document.getElementById('permReports').checked = false;
+            document.getElementById('permAudit').checked = false;
+            document.getElementById('permStaff').checked = false;
+            document.getElementById('permSettings').checked = false;
+            
             document.getElementById('addStaffModal').classList.add('active');
             document.getElementById('staffName').value = '';
             document.getElementById('staffEmail').value = '';
             document.getElementById('staffPin').value = '';
             document.getElementById('staffRole').value = 'staff';
-            document.getElementById('permFullAccess').checked = true;
-            document.getElementById('permEditPrices').checked = true;
-            document.getElementById('permVoidTransactions').checked = true;
-            document.getElementById('permViewReports').checked = true;
             
             window.editingStaffIndex = null;
         }
@@ -3069,17 +3246,23 @@
                     return;
                 }
 
+                // Get custom permissions
+                const permissions = {
+                    overview: document.getElementById('permOverview').checked,
+                    pos: document.getElementById('permPOS').checked,
+                    inventory: document.getElementById('permInventory').checked,
+                    reports: document.getElementById('permReports').checked,
+                    audit: document.getElementById('permAudit').checked,
+                    staff: document.getElementById('permStaff').checked,
+                    settings: document.getElementById('permSettings').checked
+                };
+
                 const newStaff = {
                     name: name,
                     email: email,
                     pin: pin,
                     role: role,
-                    permissions: {
-                        fullAccess: document.getElementById('permFullAccess').checked,
-                        editPrices: document.getElementById('permEditPrices').checked,
-                        voidTransactions: document.getElementById('permVoidTransactions').checked,
-                        viewReports: document.getElementById('permViewReports').checked
-                    },
+                    permissions: permissions,
                     status: 'Active',
                     joinDate: new Date().toISOString().split('T')[0],
                     lastActive: 'Never'
@@ -3124,72 +3307,46 @@
         function editStaff(staffIndex) {
             const staff = staffList[staffIndex];
             if (staff) {
-                document.getElementById('staffName').value = staff.name;
-                document.getElementById('staffEmail').value = staff.email || '';
-                document.getElementById('staffPin').value = staff.pin;
-                document.getElementById('staffBusiness').value = currentShop.id;
-                document.getElementById('staffRole').value = staff.role;
+                document.getElementById('editStaffIndex').value = staffIndex;
+                document.getElementById('editStaffName').value = staff.name;
+                document.getElementById('editStaffRole').value = staff.role;
                 
-                document.getElementById('permFullAccess').checked = staff.permissions?.fullAccess || false;
-                document.getElementById('permEditPrices').checked = staff.permissions?.editPrices || false;
-                document.getElementById('permVoidTransactions').checked = staff.permissions?.voidTransactions || false;
-                document.getElementById('permViewReports').checked = staff.permissions?.viewReports || false;
+                // Set permission checkboxes
+                document.getElementById('editPermOverview').checked = staff.permissions?.overview || false;
+                document.getElementById('editPermPOS').checked = staff.permissions?.pos || false;
+                document.getElementById('editPermInventory').checked = staff.permissions?.inventory || false;
+                document.getElementById('editPermReports').checked = staff.permissions?.reports || false;
+                document.getElementById('editPermAudit').checked = staff.permissions?.audit || false;
+                document.getElementById('editPermStaff').checked = staff.permissions?.staff || false;
+                document.getElementById('editPermSettings').checked = staff.permissions?.settings || false;
                 
-                window.editingStaffIndex = staffIndex;
-                
-                document.getElementById('addStaffModal').classList.add('active');
-                
-                const addBtn = document.querySelector('#addStaffModal .btn-primary');
-                addBtn.textContent = 'Update Staff';
-                addBtn.onclick = function() { updateStaff(staffIndex); };
+                document.getElementById('editStaffPermissionsModal').classList.add('active');
             }
         }
 
-        function updateStaff(staffIndex) {
-            const name = document.getElementById('staffName').value.trim();
-            const email = document.getElementById('staffEmail').value.trim();
-            const pin = document.getElementById('staffPin').value.trim();
-            const role = document.getElementById('staffRole').value;
-
-            if (!name || !email || !pin) {
-                alert('Please fill all required fields');
-                return;
-            }
-
-            if (pin.length !== 4 || isNaN(pin)) {
-                alert('PIN must be exactly 4 digits');
-                return;
-            }
-
-            if (pin !== staffList[staffIndex].pin) {
-                if (staffList.some((s, i) => i !== staffIndex && s.pin === pin)) {
-                    alert('PIN already exists. Please choose another.');
-                    return;
-                }
-            }
-
-            staffList[staffIndex] = {
-                ...staffList[staffIndex],
-                name: name,
-                email: email,
-                pin: pin,
-                role: role,
-                permissions: {
-                    fullAccess: document.getElementById('permFullAccess').checked,
-                    editPrices: document.getElementById('permEditPrices').checked,
-                    voidTransactions: document.getElementById('permVoidTransactions').checked,
-                    viewReports: document.getElementById('permViewReports').checked
-                }
+        function updateStaffPermissions() {
+            const staffIndex = parseInt(document.getElementById('editStaffIndex').value);
+            const role = document.getElementById('editStaffRole').value;
+            
+            // Get updated permissions
+            const permissions = {
+                overview: document.getElementById('editPermOverview').checked,
+                pos: document.getElementById('editPermPOS').checked,
+                inventory: document.getElementById('editPermInventory').checked,
+                reports: document.getElementById('editPermReports').checked,
+                audit: document.getElementById('editPermAudit').checked,
+                staff: document.getElementById('editPermStaff').checked,
+                settings: document.getElementById('editPermSettings').checked
             };
-
+            
+            // Update staff member
+            staffList[staffIndex].role = role;
+            staffList[staffIndex].permissions = permissions;
+            
             db.ref(`shops/${currentShop.id}/staffList`).set(staffList).then(() => {
-                alert('Staff member updated successfully');
-                closeModal('addStaffModal');
+                alert('Staff permissions updated successfully');
+                closeModal('editStaffPermissionsModal');
                 renderMainContent();
-                
-                const addBtn = document.querySelector('#addStaffModal .btn-primary');
-                addBtn.textContent = 'Add Staff';
-                addBtn.onclick = addNewStaff;
             });
         }
 
@@ -5238,7 +5395,7 @@
 
                                 <div class="staff-actions">
                                     <button class="btn btn-secondary" onclick="editStaff(${index})">
-                                        <i class="fas fa-edit"></i> Edit
+                                        <i class="fas fa-edit"></i> Edit Permissions
                                     </button>
                                     <button class="btn btn-danger" onclick="deactivateStaff(${index})">
                                         <i class="fas fa-ban"></i> Deactivate
