@@ -2,7 +2,7 @@
 <html lang="en">
 <head>
 <meta charset="UTF-8">
-<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
 <meta name="theme-color" content="#4B5320">
 <title>Ricky's Tavern — Bar POS</title>
 <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.0/css/all.min.css">
@@ -35,7 +35,7 @@
 *{margin:0;padding:0;box-sizing:border-box}
 body{font-family:'Inter',-apple-system,BlinkMacSystemFont,'Segoe UI',Roboto,sans-serif;background:var(--bg);color:var(--text);min-height:100vh;font-size:14px;-webkit-font-smoothing:antialiased;transition:background .2s,color .2s}
 
-/* ===== VIEWPORT SWITCHER (applies to landing page) ===== */
+/* ===== DEVICE FRAME (Landing) ===== */
 .device-frame{transition:max-width .35s ease, border-radius .35s ease, box-shadow .35s ease;margin:0 auto;}
 body.view-phone .device-frame{max-width:390px;border-radius:32px;box-shadow:0 0 0 10px #1f2410, 0 30px 60px rgba(0,0,0,.4);}
 body.view-tablet .device-frame{max-width:820px;border-radius:24px;box-shadow:0 0 0 10px #1f2410, 0 30px 60px rgba(0,0,0,.4);}
@@ -47,7 +47,7 @@ body.view-laptop .device-frame{max-width:100%;}
 .device-switcher button.active{background:#fff;color:#4B5320}
 .device-switcher button i{font-size:12px}
 
-/* ===== LANDING (professional) ===== */
+/* ===== LANDING ===== */
 .landing{min-height:100vh;background:linear-gradient(135deg,#1f2410 0%,#4B5320 50%,#6b7a3a 100%);position:relative;overflow:hidden;display:flex;flex-direction:column}
 .landing::before,.landing::after{content:"";position:absolute;border-radius:50%;opacity:.3;background:radial-gradient(circle,rgba(255,255,255,.9),transparent 70%);filter:blur(60px);pointer-events:none}
 .landing::before{width:500px;height:500px;top:-150px;left:-150px}
@@ -124,10 +124,10 @@ body.view-laptop .device-frame{max-width:100%;}
 .pin-btn.clear{font-size:13px}
 .pin-btn.enter{background:linear-gradient(135deg,var(--accent),var(--accent2));color:#fff;border:none}
 
-/* ===== APP ===== */
+/* ===== APP LAYOUT ===== */
 .app{display:none;grid-template-columns:260px 1fr;min-height:100vh}
 .app.active{display:grid}
-.sidebar{background:var(--bg2);border-right:1px solid var(--border);padding:18px 14px;display:flex;flex-direction:column;overflow-y:auto;max-height:100vh;position:sticky;top:0}
+.sidebar{background:var(--bg2);border-right:1px solid var(--border);padding:18px 14px;display:flex;flex-direction:column;overflow-y:auto;max-height:100vh;position:sticky;top:0;z-index:900;transition:transform .3s}
 .logo{display:flex;align-items:center;gap:10px;padding:0 6px 18px}
 .logo-icon{width:38px;height:38px;background:linear-gradient(135deg,var(--accent),var(--accent2));border-radius:11px;display:flex;align-items:center;justify-content:center;font-weight:700;color:#fff;font-size:16px}
 .shop-box{background:var(--bg3);border-radius:14px;padding:10px;margin-bottom:16px}
@@ -145,7 +145,15 @@ body.view-laptop .device-frame{max-width:100%;}
 .nav-item .nav-badge{margin-left:auto;background:var(--danger);color:#fff;font-size:10px;padding:2px 7px;border-radius:20px;font-weight:700}
 .user-box{margin-top:auto;padding:10px;background:var(--bg3);border-radius:12px;display:flex;align-items:center;gap:10px}
 .avatar{width:34px;height:34px;border-radius:9px;background:linear-gradient(135deg,var(--accent),var(--accent2));display:flex;align-items:center;justify-content:center;font-weight:600;color:#fff;font-size:13px}
-.main{padding:26px;overflow-y:auto;max-height:100vh}
+
+/* ===== MOBILE HEADER & OVERLAY ===== */
+.mobile-header{display:none;background:var(--bg2);border-bottom:1px solid var(--border);padding:12px 16px;justify-content:space-between;align-items:center;position:sticky;top:0;z-index:800}
+.mobile-menu-btn{background:none;border:none;color:var(--text);font-size:20px;cursor:pointer;padding:6px}
+.mobile-title{font-weight:700;font-size:16px}
+.mobile-overlay{display:none;position:fixed;inset:0;background:rgba(31,36,16,.5);z-index:850;backdrop-filter:blur(2px)}
+.mobile-overlay.active{display:block}
+
+.main{padding:26px;overflow-y:auto;max-height:100vh;padding-bottom:80px}
 .header{display:flex;justify-content:space-between;align-items:center;margin-bottom:22px;flex-wrap:wrap;gap:12px}
 .header h1{font-size:22px;font-weight:700;letter-spacing:-.3px}
 .header p{color:var(--text2);font-size:13px;margin-top:2px}
@@ -219,6 +227,7 @@ body.view-laptop .device-frame{max-width:100%;}
 .badge-muted{background:var(--bg3);color:var(--text2)}
 .badge-admin{background:linear-gradient(135deg,#b8860b,#a83232);color:#fff}
 
+/* ===== MODALS & TOASTS ===== */
 .modal{position:fixed;inset:0;background:rgba(31,36,16,.5);backdrop-filter:blur(4px);display:none;align-items:center;justify-content:center;z-index:1000;padding:20px}
 .modal.active{display:flex;animation:fadeIn .2s}
 @keyframes fadeIn{from{opacity:0}to{opacity:1}}
@@ -272,6 +281,12 @@ body.view-laptop .device-frame{max-width:100%;}
 .cloud-status.syncing .dot{background:var(--warning)}
 @keyframes pulse{0%,100%{opacity:1}50%{opacity:.5}}
 
+/* ===== MOBILE BOTTOM NAV ===== */
+.mobile-bottom-nav{display:none;position:fixed;bottom:0;left:0;right:0;background:var(--bg2);border-top:1px solid var(--border);z-index:700;padding:8px 4px;justify-content:space-around;padding-bottom:max(8px, env(safe-area-inset-bottom))}
+.mobile-nav-item{display:flex;flex-direction:column;align-items:center;gap:3px;background:none;border:none;color:var(--text2);font-size:10px;font-weight:600;padding:6px 12px;border-radius:8px;cursor:pointer;transition:all .15s}
+.mobile-nav-item i{font-size:18px}
+.mobile-nav-item.active{color:var(--accent);background:var(--accent-soft)}
+
 /* ===== RESPONSIVE ===== */
 @media (max-width:1100px){
   .landing-hero-inner{grid-template-columns:1fr;gap:40px;text-align:center}
@@ -285,14 +300,19 @@ body.view-laptop .device-frame{max-width:100%;}
 }
 @media (max-width:900px){
   .app{grid-template-columns:1fr}
-  .sidebar{display:none}
+  .sidebar{position:fixed;left:0;top:0;bottom:0;width:280px;transform:translateX(-100%);box-shadow:var(--shadow-lg);z-index:900;max-height:100vh;border-right:1px solid var(--border)}
+  .sidebar.open{transform:translateX(0)}
+  .mobile-header{display:flex}
+  .main{padding:18px 18px 90px 18px;max-height:none;height:auto;overflow-y:visible}
   .pos-grid{grid-template-columns:1fr}
-  .main{padding:18px}
-  .bar-row{grid-template-columns:110px 1fr 70px}
-  .cloud-status{bottom:10px;right:10px;font-size:11px;padding:6px 10px}
+  .cart{position:static}
+  .mobile-bottom-nav{display:flex}
+  .cloud-status{bottom:80px;right:10px;font-size:11px;padding:6px 10px}
   .device-switcher{top:10px;right:10px;padding:4px}
   .device-switcher button{padding:6px 8px;font-size:11px}
   .device-switcher button span{display:none}
+  .header h1{font-size:20px}
+  .stats{grid-template-columns:1fr 1fr}
 }
 @media (max-width:600px){
   .landing-nav{padding:16px 20px}
@@ -304,19 +324,23 @@ body.view-laptop .device-frame{max-width:100%;}
   .landing-cta{padding:14px 24px;font-size:14px}
   .landing-cta-ghost{padding:14px 18px;font-size:14px}
   .login-box{padding:30px 22px}
+  .stats{grid-template-columns:1fr}
+  .bar-row{grid-template-columns:100px 1fr 70px;font-size:12px}
+  .stat-value{font-size:20px}
+  .header{flex-direction:column;align-items:flex-start}
 }
 </style>
 </head>
 <body class="view-laptop">
 
-<!-- Device switcher (landing page only) -->
+<!-- Device switcher (Landing only) -->
 <div class="device-switcher" id="deviceSwitcher">
   <button onclick="setView('phone')" data-view="phone" title="Phone"><i class="fas fa-mobile-screen"></i><span>Phone</span></button>
   <button onclick="setView('tablet')" data-view="tablet" title="Tablet"><i class="fas fa-tablet-screen-button"></i><span>Tablet</span></button>
   <button onclick="setView('laptop')" data-view="laptop" title="Laptop" class="active"><i class="fas fa-laptop"></i><span>Laptop</span></button>
 </div>
 
-<!-- ===== LANDING ===== -->
+<!-- LANDING -->
 <div class="landing" id="landingScreen">
   <nav class="landing-nav">
     <div class="landing-brand">
@@ -431,7 +455,7 @@ body.view-laptop .device-frame{max-width:100%;}
   <div class="landing-footer-bar">© Ricky's Tavern · Secure · PIN protected · Cloud synced</div>
 </div>
 
-<!-- ===== LOGIN ===== -->
+<!-- LOGIN -->
 <div class="login-screen" id="loginScreen">
   <div class="login-box">
     <button class="login-back" onclick="showLanding()"><i class="fas fa-arrow-left"></i> Back</button>
@@ -457,9 +481,20 @@ body.view-laptop .device-frame{max-width:100%;}
   </div>
 </div>
 
-<!-- ===== APP ===== -->
+<!-- APP -->
 <div class="app" id="app">
-  <aside class="sidebar">
+  <!-- Mobile Header -->
+  <div class="mobile-header">
+    <button class="mobile-menu-btn" onclick="toggleMobileMenu()"><i class="fas fa-bars"></i></button>
+    <div class="mobile-title">Ricky's Tavern</div>
+    <button class="theme-toggle" onclick="toggleTheme()"><i class="fas fa-moon" id="mobileThemeIcon"></i></button>
+  </div>
+
+  <!-- Mobile Overlay -->
+  <div class="mobile-overlay" id="mobileOverlay" onclick="toggleMobileMenu()"></div>
+
+  <!-- Sidebar -->
+  <aside class="sidebar" id="sidebar">
     <div class="logo">
       <div class="logo-icon">R</div>
       <div>
@@ -487,7 +522,17 @@ body.view-laptop .device-frame{max-width:100%;}
       <button onclick="logout()" class="theme-toggle" title="Logout"><i class="fas fa-sign-out-alt"></i></button>
     </div>
   </aside>
+
+  <!-- Main Content -->
   <main class="main" id="main"></main>
+
+  <!-- Mobile Bottom Nav -->
+  <nav class="mobile-bottom-nav" id="mobileNav">
+    <button class="mobile-nav-item" data-tab="dashboard" onclick="switchTab('dashboard')"><i class="fas fa-chart-pie"></i> Dashboard</button>
+    <button class="mobile-nav-item" data-tab="pos" onclick="switchTab('pos')"><i class="fas fa-cash-register"></i> POS</button>
+    <button class="mobile-nav-item" data-tab="inventory" onclick="switchTab('inventory')"><i class="fas fa-boxes"></i> Stock</button>
+    <button class="mobile-nav-item" data-tab="reports" onclick="switchTab('reports')"><i class="fas fa-chart-bar"></i> Reports</button>
+  </nav>
 </div>
 
 <div class="cloud-status" id="cloudStatus" onclick="showCloudDebug()">
@@ -497,7 +542,7 @@ body.view-laptop .device-frame{max-width:100%;}
 
 <div class="toast-wrap" id="toastWrap"></div>
 
-<!-- ===== MODALS ===== -->
+<!-- MODALS -->
 <div class="modal" id="bizModal">
   <div class="modal-box">
     <button class="modal-close" onclick="closeModal('bizModal')"><i class="fas fa-times"></i></button>
@@ -883,6 +928,8 @@ function toggleTheme() {
   var next = cur === 'dark' ? 'light' : 'dark';
   document.documentElement.setAttribute('data-theme', next === 'dark' ? 'dark' : '');
   document.getElementById('themeIcon').className = next === 'dark' ? 'fas fa-sun' : 'fas fa-moon';
+  var mIcon = document.getElementById('mobileThemeIcon');
+  if (mIcon) mIcon.className = next === 'dark' ? 'fas fa-sun' : 'fas fa-moon';
   localStorage.setItem('rickys_theme', next);
 }
 (function initTheme() {
@@ -891,6 +938,8 @@ function toggleTheme() {
     document.documentElement.setAttribute('data-theme', 'dark');
     var icon = document.getElementById('themeIcon');
     if (icon) icon.className = 'fas fa-sun';
+    var mIcon = document.getElementById('mobileThemeIcon');
+    if (mIcon) mIcon.className = 'fas fa-sun';
   }
 })();
 
@@ -955,8 +1004,20 @@ function logout() {
   currentUser = null; currentBizId = null; cart = []; pinBuffer = ''; currentMode = 'bar';
   posSearchQuery = ''; invSearchQuery = ''; currentTab = 'pos';
   document.getElementById('app').classList.remove('active');
+  closeMobileMenu();
   showLanding();
   toast('Logged out', 'info');
+}
+
+function toggleMobileMenu() {
+  var sidebar = document.getElementById('sidebar');
+  var overlay = document.getElementById('mobileOverlay');
+  sidebar.classList.toggle('open');
+  overlay.classList.toggle('active');
+}
+function closeMobileMenu() {
+  document.getElementById('sidebar').classList.remove('open');
+  document.getElementById('mobileOverlay').classList.remove('active');
 }
 
 function addBusiness() {
@@ -989,7 +1050,7 @@ function addBusiness() {
   toast('Bar created — drinks seeded!', 'success');
   render();
 }
-function switchBiz(id) { currentBizId = id; cart = []; posSearchQuery = ''; invSearchQuery = ''; render(); }
+function switchBiz(id) { currentBizId = id; cart = []; posSearchQuery = ''; invSearchQuery = ''; closeMobileMenu(); render(); }
 function deleteBusiness(id) {
   if (!can('delete_business')) return toast('No permission', 'error');
   var b = data.businesses.find(function(x){ return x.id === id; });
@@ -1419,7 +1480,7 @@ function openAdminPanel() {
 
 function openModal(id) { document.getElementById(id).classList.add('active'); }
 function closeModal(id) { document.getElementById(id).classList.remove('active'); }
-function render() { renderShopList(); renderNav(); renderMain(); }
+function render() { renderShopList(); renderNav(); renderMain(); renderMobileNav(); }
 
 function renderShopList() {
   var el = document.getElementById('shopList');
@@ -1467,9 +1528,21 @@ function renderNav() {
   document.getElementById('addBizBtn').style.display = can('manage_business') ? 'inline-flex' : 'none';
 }
 
+function renderMobileNav() {
+  if (!currentUser) return;
+  var role = currentUser.role;
+  var allowedTabs = role === 'cashier' ? ['pos'] : (role === 'manager' ? ['pos','inventory'] : ['dashboard','pos','inventory','reports']);
+  document.querySelectorAll('.mobile-nav-item').forEach(function(btn) {
+    var tab = btn.getAttribute('data-tab');
+    btn.style.display = allowedTabs.indexOf(tab) !== -1 ? 'flex' : 'none';
+    btn.classList.toggle('active', currentTab === tab);
+  });
+}
+
 function switchTab(tab) {
   if (!isTabAllowed(tab)) { toast('No permission for that tab', 'error'); return; }
   currentTab = tab;
+  closeMobileMenu();
   if (tab === 'admin') openAdminPanel();
   render();
 }
