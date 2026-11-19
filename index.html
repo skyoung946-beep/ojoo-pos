@@ -192,6 +192,7 @@ body.view-laptop .device-frame{max-width:100%;}
 .search-bar .clear-search{position:absolute;right:10px;top:50%;transform:translateY(-50%);background:var(--bg3);border:none;color:var(--text2);cursor:pointer;width:26px;height:26px;border-radius:8px;display:flex;align-items:center;justify-content:center;font-size:12px}
 .search-bar .clear-search:hover{background:var(--danger-soft);color:var(--danger)}
 
+/* ===== POS GRID (4 columns on mobile) ===== */
 .pos-grid{display:grid;grid-template-columns:1fr 330px;gap:18px}
 .product-grid{display:grid;grid-template-columns:repeat(auto-fill,minmax(140px,1fr));gap:12px;max-height:68vh;overflow-y:auto;padding-right:4px}
 .product-card{background:var(--bg2);border:1px solid var(--border);border-radius:14px;padding:10px;cursor:pointer;text-align:center;transition:all .2s;box-shadow:var(--shadow);position:relative}
@@ -200,7 +201,7 @@ body.view-laptop .device-frame{max-width:100%;}
 .product-card.low{border-color:var(--danger)}
 .product-card.low::after{content:"LOW";position:absolute;top:6px;right:6px;background:var(--danger);color:#fff;font-size:9px;font-weight:700;padding:2px 6px;border-radius:6px;letter-spacing:.5px}
 .product-img{width:100%;height:82px;object-fit:cover;border-radius:10px;background:var(--bg3);margin-bottom:8px;display:flex;align-items:center;justify-content:center;color:var(--text3);font-size:26px}
-.product-name{font-size:13px;font-weight:600;margin-bottom:3px}
+.product-name{font-size:13px;font-weight:600;margin-bottom:3px;white-space:nowrap;overflow:hidden;text-overflow:ellipsis;}
 .product-price{font-size:14px;font-weight:700;color:var(--accent)}
 .product-stock{font-size:11px;color:var(--text2);margin-top:2px}
 .cart{background:var(--bg2);border:1px solid var(--border);border-radius:var(--radius);padding:16px;position:sticky;top:0;box-shadow:var(--shadow)}
@@ -226,6 +227,11 @@ body.view-laptop .device-frame{max-width:100%;}
 .badge-accent{background:var(--accent-soft);color:var(--accent)}
 .badge-muted{background:var(--bg3);color:var(--text2)}
 .badge-admin{background:linear-gradient(135deg,#b8860b,#a83232);color:#fff}
+
+/* ===== PERMISSIONS CHECKBOXES ===== */
+.perm-grid{display:grid;grid-template-columns:1fr 1fr;gap:10px;margin-top:8px;background:var(--bg3);padding:12px;border-radius:10px;}
+.perm-item{display:flex;align-items:center;gap:8px;font-size:13px;cursor:pointer;}
+.perm-item input[type="checkbox"]{width:16px;height:16px;accent-color:var(--accent);cursor:pointer;}
 
 /* ===== MODALS & TOASTS ===== */
 .modal{position:fixed;inset:0;background:rgba(31,36,16,.5);backdrop-filter:blur(4px);display:none;align-items:center;justify-content:center;z-index:1000;padding:20px}
@@ -328,6 +334,16 @@ body.view-laptop .device-frame{max-width:100%;}
   .bar-row{grid-template-columns:100px 1fr 70px;font-size:12px}
   .stat-value{font-size:20px}
   .header{flex-direction:column;align-items:flex-start}
+  .perm-grid{grid-template-columns:1fr}
+  
+  /* Force 4 columns on mobile for the POS grid */
+  .product-grid{grid-template-columns:repeat(4,1fr) !important;gap:6px;padding-right:0;}
+  .product-card{padding:5px;border-radius:10px;}
+  .product-img{height:50px;font-size:16px;}
+  .product-name{font-size:9px;white-space:normal;line-height:1.1;height:2.2em;overflow:hidden;display:-webkit-box;-webkit-line-clamp:2;-webkit-box-orient:vertical;}
+  .product-price{font-size:10px;margin-top:2px;}
+  .product-stock{display:none;}
+  .product-card.low::after{content:"LOW";font-size:7px;padding:1px 4px;top:4px;right:4px;}
 }
 </style>
 </head>
@@ -577,6 +593,7 @@ body.view-laptop .device-frame{max-width:100%;}
   </div>
 </div>
 
+<!-- ADD STAFF MODAL -->
 <div class="modal" id="staffModal">
   <div class="modal-box">
     <button class="modal-close" onclick="closeModal('staffModal')"><i class="fas fa-times"></i></button>
@@ -584,15 +601,36 @@ body.view-laptop .device-frame{max-width:100%;}
     <div class="form-group"><label>Full Name</label><input id="staffName"></div>
     <div class="form-group"><label>PIN (4 digits)</label><input id="staffPin" type="password" maxlength="4" placeholder="e.g. 5678"></div>
     <div class="form-group">
-      <label>Role</label>
-      <select id="staffRole">
-        <option value="cashier">Cashier — POS + Send Report</option>
-        <option value="manager">Manager — POS + Inventory</option>
-        <option value="admin">Admin — Full control</option>
-        <option value="owner">Owner — Full control</option>
-      </select>
+      <label>Permissions</label>
+      <div class="perm-grid">
+        <label class="perm-item"><input type="checkbox" id="permPos" checked> POS (Checkout)</label>
+        <label class="perm-item"><input type="checkbox" id="permInv"> Inventory & Stock</label>
+        <label class="perm-item"><input type="checkbox" id="permRep"> Reports & History</label>
+        <label class="perm-item"><input type="checkbox" id="permSend" checked> Send Reports</label>
+      </div>
     </div>
     <button class="btn btn-primary" style="width:100%;justify-content:center;" onclick="addStaff()">Save Staff</button>
+  </div>
+</div>
+
+<!-- EDIT STAFF MODAL -->
+<div class="modal" id="editStaffModal">
+  <div class="modal-box">
+    <button class="modal-close" onclick="closeModal('editStaffModal')"><i class="fas fa-times"></i></button>
+    <h2 style="margin-bottom:18px;font-size:18px;">Edit Staff</h2>
+    <input type="hidden" id="editStaffId">
+    <div class="form-group"><label>Full Name</label><input id="editStaffName"></div>
+    <div class="form-group"><label>New PIN (4 digits) — leave blank to keep current</label><input id="editStaffPin" type="password" maxlength="4" placeholder="e.g. 5678"></div>
+    <div class="form-group">
+      <label>Permissions</label>
+      <div class="perm-grid">
+        <label class="perm-item"><input type="checkbox" id="editPermPos"> POS (Checkout)</label>
+        <label class="perm-item"><input type="checkbox" id="editPermInv"> Inventory & Stock</label>
+        <label class="perm-item"><input type="checkbox" id="editPermRep"> Reports & History</label>
+        <label class="perm-item"><input type="checkbox" id="editPermSend"> Send Reports</label>
+      </div>
+    </div>
+    <button class="btn btn-primary" style="width:100%;justify-content:center;" onclick="saveEditStaff()">Update Staff</button>
   </div>
 </div>
 
@@ -732,15 +770,27 @@ function defaultBiz(name) {
 
 var data = JSON.parse(localStorage.getItem('rickys_tavern_v1')) || {
   businesses: [],
-  staff: [{ id: 'owner1', name: 'Ricky', pin: '1234', role: 'owner', businessId: null }]
+  staff: [{ id: 'owner1', name: 'Ricky', pin: '1234', role: 'owner', perms: ['pos', 'inventory', 'reports', 'send_report'], businessId: null }]
 };
 
 function ensureDataShape() {
   if (!data || typeof data !== 'object') data = { businesses: [], staff: [] };
   if (!Array.isArray(data.businesses)) data.businesses = [];
   if (!Array.isArray(data.staff)) data.staff = [];
+  
   var hasOwner = data.staff.some(function(s){ return s.role === 'owner' || s.role === 'admin'; });
-  if (!hasOwner) data.staff.push({ id: 'owner_auto_' + Date.now(), name: 'Ricky', pin: '1234', role: 'owner', businessId: null });
+  if (!hasOwner) data.staff.push({ id: 'owner_auto_' + Date.now(), name: 'Ricky', pin: '1234', role: 'owner', perms: ['pos', 'inventory', 'reports', 'send_report'], businessId: null });
+  
+  // Cleanup old roles and ensure perms array exists
+  data.staff.forEach(function(s){
+    if(!s.perms) {
+       if (s.role === 'owner' || s.role === 'admin') s.perms = ['pos', 'inventory', 'reports', 'send_report'];
+       else if (s.role === 'manager') s.perms = ['pos', 'inventory', 'send_report'];
+       else s.perms = ['pos', 'send_report'];
+    }
+    if (!s.role) s.role = 'custom'; // legacy fix
+  });
+
   data.businesses.forEach(function(b) {
     if (!b.id) b.id = uid();
     if (!b.mode) b.mode = 'bar';
@@ -780,6 +830,10 @@ if (firebaseAvailable) {
     updateCloudStatus('online');
     if (initialSync) { toast('☁️ Synced from cloud', 'success'); initialSync = false; }
     if (currentUser) {
+      // refresh current user perms
+      var cur = data.staff.find(function(s){return s.id === currentUser.id});
+      if (cur) currentUser = cur;
+      
       if (currentBizId && !data.businesses.find(function(b){ return b.id === currentBizId; })) {
         currentBizId = data.businesses[0] ? data.businesses[0].id : null;
         currentMode = 'bar';
@@ -879,23 +933,34 @@ function yesterdayKey() { var d = new Date(); d.setDate(d.getDate()-1); return d
 function activeInv(biz) { return biz.inventory; }
 function activeSales(biz) { return biz.sales; }
 
+/* ============================================================
+   PERMISSIONS ENGINE
+   ============================================================ */
 function can(action) {
   if (!currentUser) return false;
-  var role = currentUser.role;
-  if (role === 'owner' || role === 'admin') return true;
-  if (role === 'manager') return ['pos', 'inventory', 'play_game', 'send_report', 'manage_inventory'].indexOf(action) !== -1;
-  if (role === 'cashier') return ['pos', 'play_game', 'send_report'].indexOf(action) !== -1;
+  if (currentUser.role === 'owner' || currentUser.role === 'admin') return true;
+  var p = currentUser.perms || [];
+  if (action === 'pos') return p.includes('pos');
+  if (action === 'inventory' || action === 'manage_inventory') return p.includes('inventory');
+  if (action === 'send_report') return p.includes('send_report');
+  if (action === 'reports') return p.includes('reports');
+  if (action === 'manage_staff') return false;
+  if (action === 'manage_business') return false;
+  if (action === 'delete_business') return false;
   return false;
 }
+
 function isTabAllowed(tab) {
   if (!currentUser) return false;
-  var role = currentUser.role;
-  if (role === 'owner' || role === 'admin') return true;
-  if (role === 'manager') return ['pos', 'inventory'].indexOf(tab) !== -1;
-  if (role === 'cashier') return ['pos'].indexOf(tab) !== -1;
+  if (currentUser.role === 'owner' || currentUser.role === 'admin') return true;
+  var p = currentUser.perms || [];
+  if (tab === 'pos') return p.includes('pos');
+  if (tab === 'inventory' || tab === 'audit') return p.includes('inventory');
+  if (tab === 'reports' || tab === 'sales') return p.includes('reports');
   return false;
 }
-function enforceAllowedTab() { if (currentUser && !isTabAllowed(currentTab)) currentTab = 'pos'; }
+
+function enforceAllowedTab() { if (currentUser && !isTabAllowed(currentTab)) { currentTab = can('pos') ? 'pos' : 'dashboard'; } }
 
 function autoImage(name) {
   var initials = (name||'?').trim().split(/\s+/).slice(0,2).map(function(w){return w[0];}).join('').toUpperCase();
@@ -996,7 +1061,7 @@ function submitPin() {
   document.getElementById('userRole').textContent = staff.role.charAt(0).toUpperCase() + staff.role.slice(1);
   document.getElementById('userAvatar').textContent = staff.name.charAt(0).toUpperCase();
   if (data.businesses.length && !currentBizId) { currentBizId = data.businesses[0].id; currentMode = 'bar'; }
-  currentTab = (staff.role === 'cashier' || staff.role === 'manager') ? 'pos' : 'dashboard';
+  currentTab = can('pos') ? 'pos' : 'dashboard';
   toast('Welcome back, ' + staff.name + '!', 'success');
   render();
 }
@@ -1221,19 +1286,72 @@ function deleteProduct(id) {
   save(); toast('Deleted', 'success'); render();
 }
 
+/* ===== STAFF MANAGEMENT ===== */
 function addStaff() {
   if (!can('manage_staff')) return toast('No permission', 'error');
   var name = document.getElementById('staffName').value.trim();
   var pin = document.getElementById('staffPin').value.trim();
-  var role = document.getElementById('staffRole').value;
+  
   if (!name || pin.length !== 4) return toast('Name and 4-digit PIN required', 'error');
   if (data.staff.find(function(s){ return s.pin === pin; })) return toast('PIN already used', 'error');
-  data.staff.push({id:uid(),name:name,pin:pin,role:role,businessId:currentBizId});
+  
+  var perms = [];
+  if (document.getElementById('permPos').checked) perms.push('pos');
+  if (document.getElementById('permInv').checked) perms.push('inventory');
+  if (document.getElementById('permRep').checked) perms.push('reports');
+  if (document.getElementById('permSend').checked) perms.push('send_report');
+  
+  if (perms.length === 0) return toast('Select at least one permission', 'warning');
+
+  data.staff.push({id:uid(), name:name, pin:pin, role:'custom', perms:perms, businessId:currentBizId});
   save(); closeModal('staffModal');
   document.getElementById('staffName').value = '';
   document.getElementById('staffPin').value = '';
   toast('Staff added', 'success'); render();
 }
+
+function openEditStaff(id) {
+  var s = data.staff.find(function(x){return x.id === id});
+  if (!s) return;
+  document.getElementById('editStaffId').value = s.id;
+  document.getElementById('editStaffName').value = s.name;
+  document.getElementById('editStaffPin').value = '';
+  document.getElementById('editPermPos').checked = s.perms.includes('pos');
+  document.getElementById('editPermInv').checked = s.perms.includes('inventory');
+  document.getElementById('editPermRep').checked = s.perms.includes('reports');
+  document.getElementById('editPermSend').checked = s.perms.includes('send_report');
+  openModal('editStaffModal');
+}
+
+function saveEditStaff() {
+  if (!can('manage_staff')) return toast('No permission', 'error');
+  var id = document.getElementById('editStaffId').value;
+  var s = data.staff.find(function(x){return x.id === id});
+  if (!s) return;
+  
+  var name = document.getElementById('editStaffName').value.trim();
+  var pin = document.getElementById('editStaffPin').value.trim();
+  
+  if (!name) return toast('Name is required', 'error');
+  if (pin && pin.length !== 4) return toast('PIN must be 4 digits', 'error');
+  if (pin && data.staff.find(function(x){ return x.pin === pin && x.id !== id; })) return toast('PIN already used by another staff', 'error');
+  
+  var perms = [];
+  if (document.getElementById('editPermPos').checked) perms.push('pos');
+  if (document.getElementById('editPermInv').checked) perms.push('inventory');
+  if (document.getElementById('editPermRep').checked) perms.push('reports');
+  if (document.getElementById('editPermSend').checked) perms.push('send_report');
+  
+  if (perms.length === 0) return toast('Select at least one permission', 'warning');
+
+  s.name = name;
+  if (pin) s.pin = pin;
+  s.perms = perms;
+  
+  save(); closeModal('editStaffModal');
+  toast('Staff updated', 'success'); render();
+}
+
 function deleteStaff(id) {
   if (!can('manage_staff')) return toast('No permission', 'error');
   var staff = data.staff.find(function(s){ return s.id === id; });
@@ -1455,12 +1573,21 @@ function saveReportSettings() {
 function openAdminPanel() {
   var html = '';
   html += '<div style="font-weight:600;margin-bottom:10px;font-size:14px;">All Staff</div>';
-  html += '<table class="table" style="margin-bottom:20px;"><thead><tr><th>Name</th><th>Role</th><th>Action</th></tr></thead><tbody>';
+  html += '<table class="table" style="margin-bottom:20px;"><thead><tr><th>Name</th><th>Role / Perms</th><th>Action</th></tr></thead><tbody>';
   data.staff.forEach(function(s) {
+    var roleLabel = s.role === 'owner' ? 'Owner' : (s.role === 'admin' ? 'Admin' : 'Staff');
     var badgeClass = s.role === 'admin' ? 'badge-admin' : 'badge-accent';
-    html += '<tr><td><strong>' + s.name + '</strong></td>' +
-      '<td><span class="badge ' + badgeClass + '" style="text-transform:capitalize;">' + s.role + '</span></td>' +
-      '<td>' + (s.id !== currentUser.id ? '<button class="btn btn-danger btn-sm" onclick="deleteStaff(\'' + s.id + '\');openAdminPanel();"><i class="fas fa-trash"></i></button>' : '<span style="color:var(--text3);">You</span>') + '</td></tr>';
+    
+    // Show permissions as small text
+    var p = s.perms || [];
+    var permText = p.map(function(x){ return x === 'pos' ? 'POS' : (x === 'inventory' ? 'Stock' : (x === 'reports' ? 'Reports' : 'Send')); }).join(', ');
+
+    html += '<tr><td><strong>' + s.name + '</strong><br><span style="font-size:10px;color:var(--text3);">' + permText + '</span></td>' +
+      '<td><span class="badge ' + badgeClass + '" style="text-transform:capitalize;">' + roleLabel + '</span></td>' +
+      '<td><div style="display:flex;gap:4px;">' + 
+      (s.role !== 'owner' ? '<button class="btn btn-secondary btn-sm" onclick="openEditStaff(\'' + s.id + '\')"><i class="fas fa-edit"></i></button>' : '') +
+      (s.id !== currentUser.id && s.role !== 'owner' ? '<button class="btn btn-danger btn-sm" onclick="deleteStaff(\'' + s.id + '\');openAdminPanel();"><i class="fas fa-trash"></i></button>' : '') + 
+      '</div></td></tr>';
   });
   html += '</tbody></table>';
   html += '<div style="font-weight:600;margin-bottom:10px;font-size:14px;">Bar Overview</div>';
@@ -1500,26 +1627,32 @@ function renderShopList() {
 function renderNav() {
   if (!currentUser) return;
   var biz = currentBiz();
-  var role = currentUser.role;
   var items = [];
-  if (role === 'cashier') {
-    items.push({tab:'pos',icon:'fa-cash-register',label:'Point of Sale'});
-  } else if (role === 'manager') {
+  
+  if (currentUser.role === 'owner' || currentUser.role === 'admin') {
     var lowCount = biz ? activeInv(biz).filter(function(p){ return p.stock <= p.minStock; }).length : 0;
-    items.push({tab:'pos',icon:'fa-cash-register',label:'Point of Sale'});
-    items.push({tab:'inventory',icon:'fa-boxes',label:'Inventory',badge:lowCount});
-  } else {
-    var lowCount2 = biz ? activeInv(biz).filter(function(p){ return p.stock <= p.minStock; }).length : 0;
     items.push({tab:'dashboard',icon:'fa-chart-pie',label:'Dashboard'});
     items.push({tab:'pos',icon:'fa-cash-register',label:'Point of Sale'});
     items.push({tab:'sales',icon:'fa-receipt',label:'Sales History'});
-    items.push({tab:'inventory',icon:'fa-boxes',label:'Inventory',badge:lowCount2});
+    items.push({tab:'inventory',icon:'fa-boxes',label:'Inventory',badge:lowCount});
     items.push({tab:'audit',icon:'fa-clipboard-check',label:'Stock Audit'});
     items.push({tab:'staff',icon:'fa-users',label:'Staff'});
     items.push({tab:'reports',icon:'fa-chart-bar',label:'Reports'});
     items.push({tab:'data',icon:'fa-database',label:'Import / Export'});
     items.push({tab:'admin',icon:'fa-shield-halved',label:'Admin'});
+  } else {
+    if (can('pos')) items.push({tab:'pos',icon:'fa-cash-register',label:'Point of Sale'});
+    if (can('inventory')) {
+       var lowCount2 = biz ? activeInv(biz).filter(function(p){ return p.stock <= p.minStock; }).length : 0;
+       items.push({tab:'inventory',icon:'fa-boxes',label:'Inventory',badge:lowCount2});
+       items.push({tab:'audit',icon:'fa-clipboard-check',label:'Stock Audit'});
+    }
+    if (can('reports')) {
+       items.push({tab:'reports',icon:'fa-chart-bar',label:'Reports'});
+       items.push({tab:'sales',icon:'fa-receipt',label:'Sales History'});
+    }
   }
+
   document.getElementById('nav').innerHTML = items.map(function(i) {
     return '<div class="nav-item ' + (currentTab === i.tab ? 'active' : '') + '" onclick="switchTab(\'' + i.tab + '\')">' +
       '<i class="fas ' + i.icon + '"></i> ' + i.label +
@@ -1530,12 +1663,20 @@ function renderNav() {
 
 function renderMobileNav() {
   if (!currentUser) return;
-  var role = currentUser.role;
-  var allowedTabs = role === 'cashier' ? ['pos'] : (role === 'manager' ? ['pos','inventory'] : ['dashboard','pos','inventory','reports']);
+  var allowed = [];
+  if (can('pos')) allowed.push('pos');
+  if (can('inventory')) allowed.push('inventory');
+  if (can('reports')) allowed.push('reports');
+  
   document.querySelectorAll('.mobile-nav-item').forEach(function(btn) {
     var tab = btn.getAttribute('data-tab');
-    btn.style.display = allowedTabs.indexOf(tab) !== -1 ? 'flex' : 'none';
-    btn.classList.toggle('active', currentTab === tab);
+    if(tab === 'dashboard') {
+       btn.style.display = (currentUser.role === 'owner' || currentUser.role === 'admin') ? 'flex' : 'none';
+       btn.classList.toggle('active', currentTab === tab);
+    } else {
+       btn.style.display = allowed.indexOf(tab) !== -1 ? 'flex' : 'none';
+       btn.classList.toggle('active', currentTab === tab);
+    }
   });
 }
 
@@ -1824,13 +1965,21 @@ function renderSalesHTML(biz) {
 
 function renderStaffHTML() {
   var rows = data.staff.map(function(s) {
+    var roleLabel = s.role === 'owner' ? 'Owner' : (s.role === 'admin' ? 'Admin' : 'Custom');
     var badgeClass = s.role === 'admin' ? 'badge-admin' : 'badge-accent';
-    return '<tr><td><strong>' + s.name + '</strong></td><td><span class="badge ' + badgeClass + '" style="text-transform:capitalize;">' + s.role + '</span></td><td style="color:var(--text2);">••••</td>' +
-      '<td>' + (s.id !== currentUser.id ? '<button class="btn btn-danger btn-sm btn-icon" onclick="deleteStaff(\'' + s.id + '\')"><i class="fas fa-trash"></i></button>' : '<span style="color:var(--text3);">You</span>') + '</td></tr>';
+    var p = s.perms || [];
+    var permText = p.map(function(x){ return x === 'pos' ? 'POS' : (x === 'inventory' ? 'Stock' : (x === 'reports' ? 'Reports' : 'Send')); }).join(', ');
+
+    return '<tr><td><strong>' + s.name + '</strong><br><span style="font-size:10px;color:var(--text3);">' + permText + '</span></td>' +
+      '<td><span class="badge ' + badgeClass + '" style="text-transform:capitalize;">' + roleLabel + '</span></td>' +
+      '<td><div style="display:flex;gap:4px;">' + 
+      (s.role !== 'owner' ? '<button class="btn btn-secondary btn-sm" onclick="openEditStaff(\'' + s.id + '\')"><i class="fas fa-edit"></i></button>' : '') +
+      (s.id !== currentUser.id && s.role !== 'owner' ? '<button class="btn btn-danger btn-sm" onclick="deleteStaff(\'' + s.id + '\')"><i class="fas fa-trash"></i></button>' : '') + 
+      '</div></td></tr>';
   }).join('');
-  return '<div class="header"><div><h1>Staff</h1><p>Manage team & PINs</p></div>' +
+  return '<div class="header"><div><h1>Staff</h1><p>Manage team, PINs & permissions</p></div>' +
     '<button class="btn btn-primary" onclick="openModal(\'staffModal\')"><i class="fas fa-user-plus"></i> Add Staff</button></div>' +
-    '<div class="card"><table class="table"><thead><tr><th>Name</th><th>Role</th><th>PIN</th><th>Action</th></tr></thead><tbody>' + rows + '</tbody></table></div>';
+    '<div class="card"><table class="table"><thead><tr><th>Name & Perms</th><th>Role</th><th>Action</th></tr></thead><tbody>' + rows + '</tbody></table></div>';
 }
 
 function renderReportsHTML(biz) {
